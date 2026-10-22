@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     # Nexus domain apps
     "apps.core",
     "apps.accounts",
+    "apps.billing",
+    "apps.subjects",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
