@@ -1,0 +1,1 @@
+Nexus, interface de suivi scolaire en ligne, VS CODE PYTHON TYPESCRIPT MYSQL
