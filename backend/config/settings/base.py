@@ -48,6 +48,12 @@ INSTALLED_APPS = [
     "apps.subjects",
     "apps.documents",
     "apps.ai",
+    "apps.revision",
+    "apps.quizzes",
+    "apps.planning",
+    "apps.assistant",
+    "apps.notifications",
+    "apps.progress",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
