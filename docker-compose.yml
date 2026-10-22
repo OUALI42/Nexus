@@ -23,6 +23,8 @@ services:
   backend:
     build: ./backend
     env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
     volumes:
       - ./backend:/app
     ports:
