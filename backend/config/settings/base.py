@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.billing",
     "apps.subjects",
+    "apps.documents",
+    "apps.ai",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -143,6 +145,9 @@ USE_TZ = True  # datetimes are stored in UTC, converted for display
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Uploaded files. Never served publicly: downloads go through an authorized endpoint (ADR-007).
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
