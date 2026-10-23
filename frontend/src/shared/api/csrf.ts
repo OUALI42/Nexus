@@ -32,7 +32,11 @@ export async function ensureCsrfToken(): Promise<string> {
 
   const token = getCookie(CSRF_COOKIE_NAME);
   if (!token) {
-    throw new ApiError(0, "csrf_unavailable", "Session de sécurité indisponible.");
+    throw new ApiError(
+      0,
+      "csrf_unavailable",
+      "Session de sécurité indisponible.",
+    );
   }
   return token;
 }

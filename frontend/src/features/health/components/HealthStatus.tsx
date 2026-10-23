@@ -12,7 +12,8 @@ export function HealthStatus() {
   if (error) {
     return (
       <p role="alert">
-        API indisponible : {isApiError(error) ? error.message : "erreur inconnue"}
+        API indisponible :{" "}
+        {isApiError(error) ? error.message : "erreur inconnue"}
       </p>
     );
   }

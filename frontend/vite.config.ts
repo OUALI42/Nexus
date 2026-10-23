@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { fileURLToPath, URL } from "node:url";
 
 import react from "@vitejs/plugin-react";
@@ -10,7 +11,7 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-    server: {
+  server: {
     port: 5173,
     strictPort: true,
     proxy: {
@@ -19,5 +20,10 @@ export default defineConfig({
         changeOrigin: false,
       },
     },
+  },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
+    restoreMocks: true,
   },
 });

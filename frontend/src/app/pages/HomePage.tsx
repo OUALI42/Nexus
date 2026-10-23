@@ -8,10 +8,15 @@ export function HomePage() {
       <h1>Nexus</h1>
       <p>Ton espace de révision.</p>
       <button
-            type="button"
-            onClick={() => {api.post("/health/", {}, z.unknown()).catch((error) => console.log(error));}}>
-            Test CSRF
-        </button>
+        type="button"
+        onClick={() => {
+          api
+            .post("/health/", {}, z.unknown())
+            .catch((error) => console.log(error));
+        }}
+      >
+        Test CSRF
+      </button>
       <HealthStatus />
     </section>
   );
