@@ -1,0 +1,33 @@
+openapi: 3.0.3
+info:
+  title: Nexus API
+  version: 1.0.0
+  description: API REST de Nexus, application de suivi scolaire avec IA.
+paths:
+  /api/v1/health/:
+    get:
+      operationId: health_retrieve
+      summary: Health check
+      tags:
+      - system
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+          description: ''
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        database:
+          type: string
+      required:
+      - database
+      - status
