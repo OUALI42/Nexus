@@ -5,7 +5,13 @@ from .models import Plan, Subscription
 
 @admin.register(Plan)
 class PlanAdmin(admin.ModelAdmin):
-    list_display = ["name", "code", "monthly_price_cents", "monthly_ai_credits", "is_active"]
+    list_display = [
+        "name",
+        "code",
+        "monthly_price_cents",
+        "monthly_ai_credits",
+        "is_active",
+    ]
 
 
 @admin.register(Subscription)

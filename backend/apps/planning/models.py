@@ -12,9 +12,15 @@ class Event(TimeStampedModel):
         HOMEWORK = "homework", "Devoir"
         OTHER = "other", "Autre"
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="events")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="events"
+    )
     subject = models.ForeignKey(
-        "subjects.Subject", on_delete=models.SET_NULL, null=True, blank=True, related_name="events"
+        "subjects.Subject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="events",
     )
     title = models.CharField(max_length=200)
     kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.EXAM)
@@ -47,7 +53,9 @@ class Reminder(models.Model):
 
     event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name="reminders")
     remind_at = models.DateTimeField()
-    channel = models.CharField(max_length=10, choices=Channel.choices, default=Channel.IN_APP)
+    channel = models.CharField(
+        max_length=10, choices=Channel.choices, default=Channel.IN_APP
+    )
     sent_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -55,7 +63,10 @@ class Reminder(models.Model):
         verbose_name = "rappel"
         ordering = ["remind_at"]
         constraints = [
-            models.UniqueConstraint(fields=["event", "remind_at", "channel"], name="uniq_reminder_event_at_channel"),
+            models.UniqueConstraint(
+                fields=["event", "remind_at", "channel"],
+                name="uniq_reminder_event_at_channel",
+            ),
         ]
         indexes = [
             # Used by the Celery Beat task looking for due reminders

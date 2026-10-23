@@ -10,7 +10,9 @@ DEFAULT_PLAN_CODE = "basic"
 class Plan(TimeStampedModel):
     code = models.SlugField(max_length=20, unique=True)
     name = models.CharField(max_length=50)
-    monthly_price_cents = models.PositiveIntegerField(default=0)  # never store money as float
+    monthly_price_cents = models.PositiveIntegerField(
+        default=0
+    )  # never store money as float
     storage_quota_bytes = models.PositiveBigIntegerField()
     max_file_size_bytes = models.PositiveBigIntegerField()
     monthly_ai_credits = models.PositiveIntegerField()
@@ -33,8 +35,12 @@ class Subscription(TimeStampedModel):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subscription"
     )
-    plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="subscriptions")
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
+    plan = models.ForeignKey(
+        Plan, on_delete=models.PROTECT, related_name="subscriptions"
+    )
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.ACTIVE
+    )
     started_at = models.DateTimeField(default=timezone.now)
     current_period_end = models.DateTimeField(null=True, blank=True)
 

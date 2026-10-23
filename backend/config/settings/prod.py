@@ -14,5 +14,3 @@ CSRF_COOKIE_SECURE = True
 
 # API docs are restricted to staff in production (log in through the admin first)
 SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = ["rest_framework.permissions.IsAdminUser"]
-
-

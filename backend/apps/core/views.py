@@ -30,12 +30,19 @@ def health(request):
         database = "ok"
     except Exception:  # noqa: BLE001 - any DB failure means "down"
         database = "down"
-    http_status = status.HTTP_200_OK if database == "ok" else status.HTTP_503_SERVICE_UNAVAILABLE
-    return Response({"status": "ok" if database == "ok" else "degraded", "database": database}, status=http_status)
+    http_status = (
+        status.HTTP_200_OK if database == "ok" else status.HTTP_503_SERVICE_UNAVAILABLE
+    )
+    return Response(
+        {"status": "ok" if database == "ok" else "degraded", "database": database},
+        status=http_status,
+    )
 
 
 def _json_error(code: str, message: str, http_status: int) -> JsonResponse:
-    return JsonResponse({"error": {"code": code, "message": message, "details": {}}}, status=http_status)
+    return JsonResponse(
+        {"error": {"code": code, "message": message, "details": {}}}, status=http_status
+    )
 
 
 def not_found(request, exception=None):

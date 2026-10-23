@@ -14,6 +14,7 @@ ignore = ["E501"]  # line length is Black's job
 
 [tool.ruff.lint.per-file-ignores]
 "**/tests/**" = ["S101", "S105", "S106"]  # assert and test passwords
+"**/conftest.py" = ["S106"]               # test fixtures passwords
 "config/settings/*" = ["F403", "F405"]    # from .base import *
 
 [tool.ruff.lint.isort]

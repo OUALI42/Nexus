@@ -10,4 +10,6 @@ def create_default_subscription(sender, instance, created, raw=False, **kwargs):
     """Every new user starts on the free plan, whatever the creation path (API, admin, shell)."""
     if not created or raw:
         return
-    Subscription.objects.create(user=instance, plan=Plan.objects.get(code=DEFAULT_PLAN_CODE))
+    Subscription.objects.create(
+        user=instance, plan=Plan.objects.get(code=DEFAULT_PLAN_CODE)
+    )
