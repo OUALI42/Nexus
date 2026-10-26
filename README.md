@@ -1,4 +1,5 @@
 Nexus, interface de suivi scolaire en ligne, VS CODE PYTHON TYPESCRIPT MYSQL
+[![CI](https://github.com/<OUALI42>/nexus/actions/workflows/ci.yml/badge.svg)](https://github.com/<OUALI42>/nexus/actions/workflows/ci.yml)
 
 ## Prérequis
 
