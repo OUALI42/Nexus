@@ -29,7 +29,11 @@ class Document(TimeStampedModel):
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="documents"
     )
     subject = models.ForeignKey(
-        "subjects.Subject", on_delete=models.SET_NULL, null=True, blank=True, related_name="documents"
+        "subjects.Subject",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="documents",
     )
     title = models.CharField(max_length=255)
     kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.COURSE)
@@ -38,7 +42,9 @@ class Document(TimeStampedModel):
     mime_type = models.CharField(max_length=100)
     size_bytes = models.PositiveBigIntegerField()
     sha256 = models.CharField(max_length=64)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.PENDING
+    )
     page_count = models.PositiveIntegerField(null=True, blank=True)
     error_message = models.TextField(blank=True)
 
@@ -58,7 +64,9 @@ class Document(TimeStampedModel):
 class Chunk(models.Model):
     """Text fragment of a document. Its id is also the Qdrant point id (ADR-004)."""
 
-    document = models.ForeignKey(Document, on_delete=models.CASCADE, related_name="chunks")
+    document = models.ForeignKey(
+        Document, on_delete=models.CASCADE, related_name="chunks"
+    )
     position = models.PositiveIntegerField()
     content = models.TextField()
     token_count = models.PositiveIntegerField(default=0)
@@ -66,7 +74,9 @@ class Chunk(models.Model):
     class Meta:
         ordering = ["document", "position"]
         constraints = [
-            models.UniqueConstraint(fields=["document", "position"], name="uniq_chunk_document_position"),
+            models.UniqueConstraint(
+                fields=["document", "position"], name="uniq_chunk_document_position"
+            ),
         ]
 
     def __str__(self):

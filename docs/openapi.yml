@@ -4,6 +4,19 @@ info:
   version: 1.0.0
   description: API REST de Nexus, application de suivi scolaire avec IA.
 paths:
+  /api/v1/auth/csrf/:
+    get:
+      operationId: auth_csrf_retrieve
+      description: Sets the csrftoken cookie so the SPA can send X-CSRFToken.
+      summary: Initialize the CSRF cookie
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
   /api/v1/health/:
     get:
       operationId: health_retrieve
@@ -31,3 +44,8 @@ components:
       required:
       - database
       - status
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

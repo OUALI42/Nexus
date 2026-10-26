@@ -13,6 +13,7 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "mysql -h 127.0.0.1 -u\"$$MYSQL_USER\" -p\"$$MYSQL_PASSWORD\" -e 'SELECT 1' || exit 1"]
       interval: 5s
@@ -27,11 +28,30 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings.dev
     volumes:
       - ./backend:/app
+      - ./docs:/docs
     ports:
       - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
+        
+  redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "${MAILPIT_UI_PORT:-8025}:8025"
 
 volumes:
   mysql_data:

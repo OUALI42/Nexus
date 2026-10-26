@@ -8,7 +8,9 @@ class Notification(models.Model):
         AI_JOB = "ai_job", "Traitement IA"
         SYSTEM = "system", "Système"
 
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications"
+    )
     kind = models.CharField(max_length=20, choices=Kind.choices)
     title = models.CharField(max_length=200)
     body = models.TextField(blank=True)

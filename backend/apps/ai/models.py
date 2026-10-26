@@ -21,9 +21,13 @@ class AIJob(TimeStampedModel):
 
     # Exposed in the API instead of the sequential id
     public_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ai_jobs")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="ai_jobs"
+    )
     kind = models.CharField(max_length=30, choices=Kind.choices)
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.QUEUED)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.QUEUED
+    )
     cost = models.PositiveSmallIntegerField(default=0)  # AI credits (ADR-008)
     input = models.JSONField(default=dict, blank=True)
     result = models.JSONField(default=dict, blank=True)  # e.g. {"sheet_id": 12}

@@ -1,4 +1,5 @@
 # Architecture Decision Records — Nexus
+**Statut : remplacé par l'ADR-013.**
 
 Chaque entrée suit le format : **Contexte → Décision → Alternatives écartées → Conséquences**.
 Statuts possibles : `Accepté`, `Proposé`, `Remplacé par ADR-XXX`.
@@ -191,3 +192,31 @@ Tout le code métier passe par une interface `AIProvider` (`apps/ai/providers/`)
 **Contexte.** Pas encore décidée.
 
 **Décision provisoire.** Tout est conteneurisé et configuré par variables d'environnement (principes 12-factor). Le projet reste donc déployable sur un VPS (Docker Compose + reverse proxy Caddy) comme sur un PaaS. La décision sera prise avant la story de déploiement, en privilégiant un hébergeur européen (données d'élèves).
+
+## ADR-013 — Authentification par session Django et protection CSRF
+
+**Statut :** accepté — remplace l'ADR-002.
+
+**Contexte.** L'ADR-002 prévoyait des JWT avec refresh token en cookie httpOnly.
+La story S2 impose une authentification DRF par session avec CSRF. Le front React
+est servi sur la même origine que l'API (proxy Vite en développement, même domaine
+en production).
+
+**Décision.** Authentification par `SessionAuthentication` de DRF. Cookie de session
+httpOnly, `SameSite=Lax`, `Secure` en production. Jeton CSRF transmis dans l'en-tête
+`X-CSRFToken`, lu par le front depuis le cookie `csrftoken`, initialisé par
+`GET /api/v1/auth/csrf/`.
+
+**Alternatives écartées.**
+- JWT + refresh token en cookie : même protection contre le XSS sur une origine
+  unique, mais complexité supplémentaire (rotation, liste noire, révocation).
+- JWT stocké en localStorage : vulnérable au vol de jeton par XSS.
+
+**Conséquences.**
+- Révocation immédiate : supprimer la session déconnecte l'utilisateur.
+- Pas de CORS nécessaire : django-cors-headers n'est pas installé.
+- DRF n'impose le CSRF qu'aux utilisateurs authentifiés : les vues de connexion et
+  d'inscription appliqueront `csrf_protect` explicitement (protection contre le
+  login CSRF).
+- Une future application mobile nécessiterait un mécanisme par jeton
+  supplémentaire, qui fera l'objet d'un nouvel ADR.
