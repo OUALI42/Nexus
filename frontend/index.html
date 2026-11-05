@@ -1,16 +1,16 @@
 <!doctype html>
 <html lang="en">
   <head>
-      <script>
-        // Applies the saved theme before the first paint to avoid a flash.
-        (function () {
-          try {
-            var theme = localStorage.getItem("nexus-theme");
-            if (theme === "light" || theme === "dark") {
-              document.documentElement.dataset.theme = theme;
-            }
-          } catch (e) {}
-        })();
+    <script>
+      // Applies the saved theme before the first paint to avoid a flash.
+      (function () {
+        try {
+          var theme = localStorage.getItem("nexus-theme");
+          if (theme === "light" || theme === "dark") {
+            document.documentElement.dataset.theme = theme;
+          }
+        } catch (e) {}
+      })();
     </script>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

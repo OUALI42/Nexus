@@ -4,6 +4,7 @@ import { RootLayout } from "./layouts/RootLayout";
 import { HomePage } from "./pages/HomePage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { RouteErrorPage } from "./pages/RouteErrorPage";
+import { DesignSystemPage } from "./pages/DesignSystemPage";
 
 export const router = createBrowserRouter([
   {
@@ -12,6 +13,9 @@ export const router = createBrowserRouter([
     ErrorBoundary: RouteErrorPage,
     children: [
       { index: true, Component: HomePage },
+      ...(import.meta.env.DEV
+        ? [{ path: "design", Component: DesignSystemPage }]
+        : []),
       { path: "*", Component: NotFoundPage },
     ],
   },
