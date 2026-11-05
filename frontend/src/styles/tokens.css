@@ -1,72 +1,48 @@
 /*
- * Design tokens. Every color is light-dark(<light>, <dark>):
- * the browser picks the value from the active color-scheme.
+ * Design tokens, taken from the Nexus mockup.
+ * Raw values live in :root as light-dark(<light>, <dark>) or a fixed hex;
+ * @theme inline exposes them to Tailwind (bg-surface, text-fg-muted...).
  */
 :root {
   color-scheme: light dark; /* follows the OS by default */
 
   /* Surfaces */
-  --color-bg: light-dark(#f6f7fb, #0b1026);
-  --color-surface: light-dark(#ffffff, #141b3c);
-  --color-surface-muted: light-dark(#ebeef7, #1d2550);
+  --nx-canvas: light-dark(#f1f0ff, #0b1020);
+  --nx-surface: light-dark(#ffffff, #161b33);
+  --nx-surface-muted: light-dark(#eeedff, #26306b);
+  --nx-line: light-dark(#e3e3f5, #2a3158); /* decorative separators only */
+  --nx-control: light-dark(#767ea3, #6b76a3); /* input borders: >= 3:1 */
 
   /* Text */
-  --color-text: light-dark(#0f1733, #e8eaf6);
-  --color-text-muted: light-dark(#4a5274, #a9b0d0);
+  --nx-fg: light-dark(#0f172a, #f1f5f9);
+  --nx-fg-muted: light-dark(#475569, #b6c0d4);
 
-  /* Brand: indigo = main actions, violet = AI features */
-  --color-primary: light-dark(#4338ca, #a5b4fc);
-  --color-primary-hover: light-dark(#3730a3, #c7d2fe);
-  --color-on-primary: light-dark(#ffffff, #0b1026);
-  --color-ai: light-dark(#6d28d9, #c4b5fd);
-  --color-on-ai: light-dark(#ffffff, #0b1026);
+  /* Brand */
+  --nx-primary: light-dark(#4338ca, #a5b4fc); /* links, outline buttons */
+  --nx-brand-from: #4f46e5;
+  --nx-brand-to: #7c3aed;
+  --nx-on-brand: #ffffff;
+  --nx-ai: light-dark(#6d28d9, #c4b5fd);
+  --nx-ai-strong: #6d28d9;
 
   /* Feedback */
-  --color-danger: light-dark(#b91c1c, #fca5a5);
-  --color-on-danger: light-dark(#ffffff, #0b1026);
-  --color-success: light-dark(#166534, #86efac);
+  --nx-danger: light-dark(#b91c1c, #fca5a5);
+  --nx-success: light-dark(#166534, #86efac);
 
-  /* Lines */
-  --color-border: light-dark(#d5d9e8, #2e3768); /* decorative separators only */
-  --color-control-border: light-dark(#7a819e, #7880b0); /* inputs: >= 3:1 */
-  --color-focus-ring: light-dark(#4338ca, #a5b4fc);
+  /* Focus */
+  --nx-focus: light-dark(#6d28d9, #a78bfa);
+
+  /* Navigation: always dark, in both themes */
+  --nx-nav-from: #1e1b4b;
+  --nx-nav-via: #3730a3;
+  --nx-nav-to: #5b21b6;
+  --nx-nav-text: #e0e7ff;
+  --nx-nav-accent: #67e8f9;
+  --nx-nav-focus: #a78bfa;
+  --nx-nav-active: rgb(255 255 255 / 0.15);
 
   /* Typography */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Code", Consolas, monospace;
-  --text-sm: 0.875rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.5rem;
-  --text-2xl: 2rem;
-  --leading: 1.5;
-
-  /* Spacing (4px scale) */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-
-  /* Shape */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 1rem;
-  --shadow-md: 0 4px 16px light-dark(rgb(15 23 51 / 0.08), rgb(0 0 0 / 0.4));
-
-  /* Accessibility */
-  --tap-target: 2.75rem; /* 44px minimum clickable size */
-  --focus-ring: 3px solid var(--color-focus-ring);
-  --focus-offset: 2px;
-
-  /* Layout */
-  --sidebar-width: 15rem;
-  --bottom-bar-height: 4rem;
-  --z-nav: 10;
-  --z-modal: 100;
-  --z-toast: 200;
-  --duration: 150ms;
+  --nx-font-sans: "Manrope Variable", system-ui, sans-serif;
 }
 
 /* Explicit user choice overrides the OS (set by the theme logic in step 2). */
@@ -76,4 +52,45 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
+}
+
+/* Only design-system colors: Tailwind's default palette is disabled. */
+@theme {
+  --color-*: initial;
+
+  --radius-control: 0.875rem; /* 14px: buttons, inputs */
+  --radius-card: 1.25rem; /* 20px */
+  --radius-nav: 1.625rem; /* 26px: floating sidebar */
+  --shadow-card: 0 8px 24px rgb(30 27 75 / 0.08);
+  --shadow-brand: 0 6px 16px rgb(79 70 229 / 0.25);
+  --spacing-tap: 2.75rem; /* 44px minimum clickable size */
+  --spacing-sidebar: 15.5rem; /* 248px */
+}
+
+@theme inline {
+  --color-canvas: var(--nx-canvas);
+  --color-surface: var(--nx-surface);
+  --color-surface-muted: var(--nx-surface-muted);
+  --color-line: var(--nx-line);
+  --color-control: var(--nx-control);
+  --color-fg: var(--nx-fg);
+  --color-fg-muted: var(--nx-fg-muted);
+  --color-primary: var(--nx-primary);
+  --color-brand-from: var(--nx-brand-from);
+  --color-brand-to: var(--nx-brand-to);
+  --color-on-brand: var(--nx-on-brand);
+  --color-ai: var(--nx-ai);
+  --color-ai-strong: var(--nx-ai-strong);
+  --color-danger: var(--nx-danger);
+  --color-success: var(--nx-success);
+  --color-focus: var(--nx-focus);
+  --color-nav-from: var(--nx-nav-from);
+  --color-nav-via: var(--nx-nav-via);
+  --color-nav-to: var(--nx-nav-to);
+  --color-nav-text: var(--nx-nav-text);
+  --color-nav-accent: var(--nx-nav-accent);
+  --color-nav-focus: var(--nx-nav-focus);
+  --color-nav-active: var(--nx-nav-active);
+
+  --font-sans: var(--nx-font-sans);
 }

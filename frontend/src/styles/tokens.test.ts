@@ -6,22 +6,28 @@ import { describe, expect, it } from "vitest";
 
 import { contrastRatio } from "@/shared/a11y/contrast";
 
-const tokensCss = readFileSync(new URL("./tokens.css", import.meta.url), "utf8");
+const tokensCss = readFileSync(
+  new URL("./tokens.css", import.meta.url),
+  "utf8",
+);
 
 type Theme = "light" | "dark";
 
-const LIGHT_DARK_TOKEN =
-  /--([\w-]+):\s*light-dark\((#[0-9a-f]{6}),\s*(#[0-9a-f]{6})\)/gi;
+// --nx-name: light-dark(#light, #dark);  or  --nx-name: #fixed;
+const TOKEN =
+  /--nx-([\w-]+):\s*(?:light-dark\((#[0-9a-f]{6}),\s*(#[0-9a-f]{6})\)|(#[0-9a-f]{6}))\s*;/gi;
 
 function parseTokens(css: string): Record<Theme, Map<string, string>> {
   const themes = {
     light: new Map<string, string>(),
     dark: new Map<string, string>(),
   };
-  for (const [, name, light, dark] of css.matchAll(LIGHT_DARK_TOKEN)) {
-    if (name && light && dark) {
-      themes.light.set(name, light);
-      themes.dark.set(name, dark);
+  for (const [, name, light, dark, fixed] of css.matchAll(TOKEN)) {
+    const lightValue = light ?? fixed;
+    const darkValue = dark ?? fixed;
+    if (name && lightValue && darkValue) {
+      themes.light.set(name, lightValue);
+      themes.dark.set(name, darkValue);
     }
   }
   return themes;
@@ -32,27 +38,34 @@ const UI = 3; // WCAG AA, UI components and focus indicators
 
 // [foreground token, background token, minimum ratio]
 const PAIRS: [string, string, number][] = [
-  ["color-text", "color-bg", TEXT],
-  ["color-text", "color-surface", TEXT],
-  ["color-text", "color-surface-muted", TEXT],
-  ["color-text-muted", "color-bg", TEXT],
-  ["color-text-muted", "color-surface", TEXT],
-  ["color-text-muted", "color-surface-muted", TEXT],
-  ["color-primary", "color-bg", TEXT],
-  ["color-primary", "color-surface", TEXT],
-  ["color-ai", "color-bg", TEXT],
-  ["color-ai", "color-surface", TEXT],
-  ["color-danger", "color-surface", TEXT],
-  ["color-success", "color-surface", TEXT],
-  ["color-success", "color-surface-muted", TEXT],
-  ["color-on-primary", "color-primary", TEXT],
-  ["color-on-primary", "color-primary-hover", TEXT],
-  ["color-on-ai", "color-ai", TEXT],
-  ["color-on-danger", "color-danger", TEXT],
-  ["color-control-border", "color-bg", UI],
-  ["color-control-border", "color-surface", UI],
-  ["color-focus-ring", "color-bg", UI],
-  ["color-focus-ring", "color-surface", UI],
+  ["fg", "canvas", TEXT],
+  ["fg", "surface", TEXT],
+  ["fg", "surface-muted", TEXT],
+  ["fg-muted", "canvas", TEXT],
+  ["fg-muted", "surface", TEXT],
+  ["fg-muted", "surface-muted", TEXT],
+  ["primary", "canvas", TEXT],
+  ["primary", "surface", TEXT],
+  ["primary", "surface-muted", TEXT],
+  ["ai", "canvas", TEXT],
+  ["ai", "surface", TEXT],
+  ["danger", "canvas", TEXT],
+  ["danger", "surface", TEXT],
+  ["success", "canvas", TEXT],
+  ["success", "surface", TEXT],
+  ["on-brand", "brand-from", TEXT],
+  ["on-brand", "brand-to", TEXT],
+  ["on-brand", "ai-strong", TEXT],
+  ["nav-text", "nav-from", TEXT],
+  ["nav-text", "nav-via", TEXT],
+  ["nav-text", "nav-to", TEXT],
+  ["control", "canvas", UI],
+  ["control", "surface", UI],
+  ["focus", "canvas", UI],
+  ["focus", "surface", UI],
+  ["nav-focus", "nav-from", UI],
+  ["nav-focus", "nav-via", UI],
+  ["nav-focus", "nav-to", UI],
 ];
 
 const themes = parseTokens(tokensCss);

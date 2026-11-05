@@ -15,4 +15,8 @@
   },
   "eslint.workingDirectories": ["frontend"],
   "typescript.tsdk": "frontend/node_modules/typescript/lib",
+  
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
 }
