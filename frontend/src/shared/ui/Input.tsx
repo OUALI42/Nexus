@@ -28,15 +28,15 @@ export function Input({
 
   return (
     <div className="flex flex-col gap-1.5">
-        <label htmlFor={inputId} className="font-semibold">
-            {label}
-            {required && (
-            <>
-                {" "}
-                <span className="font-normal text-fg-muted">(obligatoire)</span>
-            </>
-            )}
-        </label>
+      <label htmlFor={inputId} className="font-semibold">
+        {label}
+        {required && (
+          <>
+            {" "}
+            <span className="font-normal text-fg-muted">(obligatoire)</span>
+          </>
+        )}
+      </label>
 
       {hint && (
         <p id={hintId} className="text-sm text-fg-muted">
