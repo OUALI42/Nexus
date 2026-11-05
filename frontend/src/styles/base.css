@@ -1,0 +1,31 @@
+@layer base {
+  body {
+    min-height: 100dvh;
+    font-family: var(--nx-font-sans);
+    color: var(--nx-fg);
+    background: var(--nx-canvas);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a {
+    color: var(--nx-primary);
+    text-underline-offset: 0.2em;
+  }
+
+  /* Visible focus for keyboard users only (not on mouse click). */
+  :focus-visible {
+    outline: 3px solid var(--nx-focus);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

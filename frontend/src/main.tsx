@@ -1,4 +1,5 @@
 import "./config/env"; // validates env vars at startup
+import "@fontsource-variable/manrope";
 import "./index.css";
 
 import { StrictMode } from "react";

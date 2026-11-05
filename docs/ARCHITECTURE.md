@@ -100,34 +100,28 @@ apps/<domain>/
 - Une app ne lit pas directement les modèles d'une autre app pour y écrire : elle passe par le service de cette app. Exemple : `revision` appelle `ai.services.create_job()`.
 - `apps/ai` est le seul module qui parle au fournisseur IA.
 
-## Frontend — organisation par feature
+### Front-end : organisation 
 
-```
-frontend/
-├── src/
-│   ├── app/                 # router, providers (QueryClient, Auth), layout
-│   ├── features/
-│   │   ├── auth/
-│   │   ├── subjects/
-│   │   ├── documents/
-│   │   ├── revision/
-│   │   ├── quizzes/
-│   │   ├── planning/
-│   │   ├── assistant/
-│   │   ├── progress/
-│   │   └── account/         # profile, plan, usage, account deletion
-│   ├── shared/
-│   │   ├── api/             # axios client, JWT interceptor, error parsing
-│   │   ├── components/      # design-system UI components
-│   │   ├── hooks/
-│   │   └── utils/
-│   ├── styles/
-│   └── main.tsx
-├── index.html
-├── vite.config.ts
-├── tsconfig.json
-└── Dockerfile
-```
+    frontend/src/
+    ├── app/
+    │   ├── navigation.ts        # navigation decrite une fois (sidebar, barre mobile, routes)
+    │   ├── router.tsx           # routes (+ /design en developpement)
+    │   ├── layouts/             # RootLayout, Sidebar, BottomNav
+    │   └── pages/               # pages d'assemblage
+    ├── features/                # une fonctionnalite par dossier (health pour l'instant)
+    ├── shared/
+    │   ├── a11y/contrast.ts     # calcul du contraste WCAG
+    │   ├── api/                 # client API unique
+    │   ├── lib/cx.ts            # assemblage de classes
+    │   ├── theme/               # preference de theme (contexte, hook, selecteur)
+    │   └── ui/                  # Button, Input, Modal, PageHeader, toast/
+    ├── styles/
+    │   ├── tokens.css           # tokens de design (light-dark + @theme)
+    │   ├── tokens.test.ts       # contraste AA des tokens
+    │   └── base.css             # styles de base, focus visible, animations reduites
+    └── test/                    # setup, rendu de l'application, audit axe
+
+Le design system est visible en développement sur `/design`.
 
 Structure type d'une feature :
 

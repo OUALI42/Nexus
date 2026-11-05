@@ -10,6 +10,7 @@
     "ms-azuretools.vscode-containers",
     "github.vscode-github-actions",
     "redhat.vscode-yaml",
-    "editorconfig.editorconfig"
+    "editorconfig.editorconfig",
+    "bradlc.vscode-tailwindcss"
   ]
 }

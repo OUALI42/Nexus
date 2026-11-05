@@ -1,10 +1,12 @@
 import { Link } from "react-router";
 
+import { PageHeader } from "@/shared/ui/PageHeader";
+
 export function NotFoundPage() {
   return (
-    <section>
-      <h1>Page introuvable</h1>
-      <Link to="/">Retour à l'accueil</Link>
-    </section>
+    <>
+      <PageHeader title="Page introuvable" />
+      <Link to="/">Retour au tableau de bord</Link>
+    </>
   );
 }

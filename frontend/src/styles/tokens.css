@@ -1,0 +1,99 @@
+/*
+ * Design tokens, taken from the Nexus mockup.
+ * Raw values live in :root as light-dark(<light>, <dark>) or a fixed hex;
+ * @theme inline exposes them to Tailwind (bg-surface, text-fg-muted...).
+ */
+:root {
+  color-scheme: light dark; /* follows the OS by default */
+
+  /* Surfaces */
+  --nx-canvas: light-dark(#f1f0ff, #0b1020);
+  --nx-surface: light-dark(#ffffff, #161b33);
+  --nx-surface-muted: light-dark(#eeedff, #26306b);
+  --nx-line: light-dark(#e3e3f5, #2a3158); /* decorative separators only */
+  --nx-control: light-dark(#767ea3, #6b76a3); /* input borders: >= 3:1 */
+
+  /* Text */
+  --nx-fg: light-dark(#0f172a, #f1f5f9);
+  --nx-fg-muted: light-dark(#475569, #b6c0d4);
+
+  /* Brand */
+  --nx-primary: light-dark(#4338ca, #a5b4fc); /* links, outline buttons */
+  --nx-brand-from: #4f46e5;
+  --nx-brand-to: #7c3aed;
+  --nx-on-brand: #ffffff;
+  --nx-ai: light-dark(#6d28d9, #c4b5fd);
+  --nx-ai-strong: #6d28d9;
+
+  /* Feedback */
+  --nx-danger: light-dark(#b91c1c, #fca5a5);
+  --nx-success: light-dark(#166534, #86efac);
+
+  /* Focus */
+  --nx-focus: light-dark(#6d28d9, #a78bfa);
+
+  /* Navigation: always dark, in both themes */
+  --nx-nav-from: #1e1b4b;
+  --nx-nav-via: #3730a3;
+  --nx-nav-to: #5b21b6;
+  --nx-nav-text: #e0e7ff;
+  --nx-nav-accent: #67e8f9;
+  --nx-nav-focus: #a78bfa;
+  --nx-nav-active: rgb(255 255 255 / 0.15);
+
+  /* Typography */
+  --nx-font-sans: "Manrope Variable", system-ui, sans-serif;
+
+  /* Layout */
+  --nx-bottom-bar: 4.5rem; /* mobile bottom navigation height */
+}
+
+/* Explicit user choice overrides the OS (set by the theme logic in step 2). */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Only design-system colors: Tailwind's default palette is disabled. */
+@theme {
+  --color-*: initial;
+
+  --radius-control: 0.875rem; /* 14px: buttons, inputs */
+  --radius-card: 1.25rem; /* 20px */
+  --radius-nav: 1.625rem; /* 26px: floating sidebar */
+  --shadow-card: 0 8px 24px rgb(30 27 75 / 0.08);
+  --shadow-brand: 0 6px 16px rgb(79 70 229 / 0.25);
+  --spacing-tap: 2.75rem; /* 44px minimum clickable size */
+  --spacing-sidebar: 15.5rem; /* 248px */
+}
+
+@theme inline {
+  --color-canvas: var(--nx-canvas);
+  --color-surface: var(--nx-surface);
+  --color-surface-muted: var(--nx-surface-muted);
+  --color-line: var(--nx-line);
+  --color-control: var(--nx-control);
+  --color-fg: var(--nx-fg);
+  --color-fg-muted: var(--nx-fg-muted);
+  --color-primary: var(--nx-primary);
+  --color-brand-from: var(--nx-brand-from);
+  --color-brand-to: var(--nx-brand-to);
+  --color-on-brand: var(--nx-on-brand);
+  --color-ai: var(--nx-ai);
+  --color-ai-strong: var(--nx-ai-strong);
+  --color-danger: var(--nx-danger);
+  --color-success: var(--nx-success);
+  --color-focus: var(--nx-focus);
+  --color-nav-from: var(--nx-nav-from);
+  --color-nav-via: var(--nx-nav-via);
+  --color-nav-to: var(--nx-nav-to);
+  --color-nav-text: var(--nx-nav-text);
+  --color-nav-accent: var(--nx-nav-accent);
+  --color-nav-focus: var(--nx-nav-focus);
+  --color-nav-active: var(--nx-nav-active);
+
+  --font-sans: var(--nx-font-sans);
+}

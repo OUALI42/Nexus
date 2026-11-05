@@ -14,6 +14,7 @@ Nexus, interface de suivi scolaire en ligne, VS CODE PYTHON TYPESCRIPT MYSQL
 
     cp .env.example .env   # PowerShell : Copy-Item .env.example .env
     docker compose up -d
+    - Design system (développement) : http://localhost:5173/design
 
 - API : http://localhost:8000/api/v1/health/
 - Documentation API : http://localhost:8000/api/docs/

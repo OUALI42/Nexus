@@ -220,3 +220,78 @@ httpOnly, `SameSite=Lax`, `Secure` en production. Jeton CSRF transmis dans l'en-
   login CSRF).
 - Une future application mobile nécessiterait un mécanisme par jeton
   supplémentaire, qui fera l'objet d'un nouvel ADR.
+
+
+  ## ADR-014 — Tailwind CSS v4 et tokens de design à deux thèmes
+
+**Statut :** accepté.
+
+**Contexte.** La story S3 exige une interface cohérente, en thème clair ou sombre,
+avec un contraste AA vérifié dans les deux thèmes, le thème système par défaut et
+un choix mémorisé. La maquette définit la palette (bleu nuit, indigo, violet IA),
+la typographie (Manrope) et les formes.
+
+**Décision.**
+- Tailwind CSS v4, configuré directement en CSS (`@theme`), sans fichier de configuration JavaScript.
+- Les couleurs sont des variables CSS déclarées une seule fois avec `light-dark(<clair>, <sombre>)`,
+  puis exposées à Tailwind par `@theme inline`. Le thème actif dépend de `color-scheme` :
+  système par défaut, forcé par l'attribut `data-theme` de `<html>`.
+- La palette par défaut de Tailwind est désactivée (`--color-*: initial`) : seules les
+  couleurs du design system existent.
+- Un test calcule le contraste WCAG de chaque paire de couleurs utilisée, dans les deux
+  thèmes, à partir du fichier de tokens lui-même. Il tourne dans la CI.
+- Manrope est auto-hébergée (Fontsource) au lieu d'être chargée depuis Google Fonts.
+
+**Alternatives écartées.**
+- CSS Modules : aucune dépendance, mais une feuille de style par composant et une
+  cohérence plus difficile à garantir sur un projet mené seul.
+- Variante `dark:` de Tailwind dans chaque composant : chaque couleur serait écrite
+  deux fois, avec un risque d'oubli. `light-dark()` règle le thème une fois pour toutes
+  dans les tokens.
+- Bibliothèque de composants (MUI, Chakra) : style imposé, difficile à aligner sur la maquette.
+- Google Fonts : requête vers un serveur tiers à chaque visite, contraire à l'approche
+  européenne retenue pour le RGPD (ADR-005).
+
+**Conséquences.**
+- Un composant écrit `bg-surface` et fonctionne dans les deux thèmes sans code supplémentaire.
+- Une couleur ajoutée sans paire de contraste testée n'est pas vérifiée : toute nouvelle
+  combinaison texte/fond doit être ajoutée à `tokens.test.ts`.
+- `light-dark()` exige un navigateur publié après mai 2024.
+- Le script qui applique le thème avant le premier affichage est un script en ligne :
+  il devra être autorisé par une empreinte dans la Content Security Policy.
+
+## ADR-015 — Composants accessibles construits sur les éléments HTML natifs
+
+**Statut :** accepté.
+
+**Contexte.** La story S3 exige des composants Button, Input, Modal et Toast accessibles
+(labels, focus visible, piège de focus), des cibles de 44 px, une navigation entièrement
+au clavier et une page active signalée autrement que par la couleur.
+
+**Décision.**
+- Chaque composant repose d'abord sur l'élément HTML natif qui porte déjà la sémantique :
+  `<button>`, `<input>` et `<label>`, `<dialog>` ouvert par `showModal()`, régions
+  `role="status"` et `role="alert"`, boutons radio pour le choix du thème.
+- Le comportement natif est complété là où il ne suffit pas : piège de focus et retour
+  du focus de la modale, pause des toasts au survol, focus sur le titre après un
+  changement de page.
+- La taille minimale des cibles est un token (`--spacing-tap`, 44 px), utilisé par
+  tous les éléments interactifs.
+- Un état n'est jamais signalé par la seule couleur : forme (barre, coche, icône) et
+  graisse s'y ajoutent.
+- L'accessibilité est testée automatiquement (axe-core, Testing Library) et suivant un
+  protocole manuel documenté dans `docs/ACCESSIBILITY.md`.
+
+**Alternatives écartées.**
+- Bibliothèques de composants sans style (Radix UI, React Aria) : très robustes, mais
+  une dépendance supplémentaire pour quatre composants que le HTML natif couvre en grande partie.
+- Modale construite sur une `<div>` : inertie de la page, Échap et annonce du rôle
+  seraient à recoder entièrement.
+
+**Conséquences.**
+- Moins de code et de dépendances, et un comportement familier aux utilisateurs de
+  technologies d'assistance.
+- Une modale ouverte passe au-dessus de tout, toasts compris : un toast de confirmation
+  doit être affiché après la fermeture de la modale.
+- Des composants plus complexes (liste déroulante avec recherche, sélecteur de date)
+  pourront justifier une bibliothèque comme React Aria, via un nouvel ADR.

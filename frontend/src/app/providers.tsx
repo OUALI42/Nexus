@@ -1,7 +1,8 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { ReactNode } from "react";
-
+import { ToastProvider } from "@/shared/ui/toast/ToastProvider";
+import { ThemeProvider } from "@/shared/theme/ThemeProvider";
 import { queryClient } from "./query-client";
 
 type AppProvidersProps = {
@@ -10,9 +11,13 @@ type AppProvidersProps = {
 
 export function AppProviders({ children }: AppProvidersProps) {
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    <ThemeProvider>
+      <ToastProvider>
+        <QueryClientProvider client={queryClient}>
+          {children}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </ToastProvider>
+    </ThemeProvider>
   );
 }
