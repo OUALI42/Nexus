@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, type RouteObject } from "react-router";
 
 import { NAV_ITEMS } from "./navigation";
 import { RootLayout } from "./layouts/RootLayout";
@@ -16,7 +16,7 @@ const placeholderRoutes = NAV_ITEMS.filter((item) => item.to !== "/").map(
   }),
 );
 
-export const router = createBrowserRouter([
+export const routes: RouteObject[] = [
   {
     path: "/",
     Component: RootLayout,
@@ -30,4 +30,6 @@ export const router = createBrowserRouter([
       { path: "*", Component: NotFoundPage },
     ],
   },
-]);
+];
+
+export const router = createBrowserRouter(routes);

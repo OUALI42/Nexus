@@ -72,7 +72,8 @@ export function BottomNav() {
               Plus
               {isMoreActive && (
                 <>
-                  <span className="sr-only"> (contient la page actuelle)</span>
+                  {" "}
+                  <span className="sr-only">(contient la page actuelle)</span>
                   <ActiveBar />
                 </>
               )}
