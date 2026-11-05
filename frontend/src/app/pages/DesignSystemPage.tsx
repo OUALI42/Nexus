@@ -3,9 +3,11 @@ import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
 import { useState } from "react";
 import { Modal } from "@/shared/ui/Modal";
+import { useToast } from "@/shared/ui/toast/useToast";
 
 export function DesignSystemPage() {
   const [isModalOpen, setModalOpen] = useState(false);
+  const toast = useToast();
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-10 p-8">
       <header className="flex flex-col gap-2">
@@ -80,6 +82,7 @@ export function DesignSystemPage() {
                 variant="danger"
                 onClick={() => {
                   setModalOpen(false);
+                  toast.success("Casier supprimé.");
                 }}
               >
                 Supprimer
@@ -89,6 +92,36 @@ export function DesignSystemPage() {
         >
           <Input label="Tape le nom du casier pour confirmer" />
         </Modal>
+      </section>
+
+      <section className="flex flex-col gap-4 rounded-card border border-line bg-surface p-6 shadow-card">
+        <h2 className="text-xl font-bold">Notifications</h2>
+        <div className="flex flex-wrap gap-3">
+          <Button
+            variant="outline"
+            onClick={() => {
+              toast.success("Fiche générée.");
+            }}
+          >
+            Succès
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              toast.info("Analyse du document en cours.");
+            }}
+          >
+            Information
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              toast.error("La génération a échoué. Réessaie dans un instant.");
+            }}
+          >
+            Erreur
+          </Button>
+        </div>
       </section>
     </div>
   );

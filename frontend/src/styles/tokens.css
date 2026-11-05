@@ -43,6 +43,9 @@
 
   /* Typography */
   --nx-font-sans: "Manrope Variable", system-ui, sans-serif;
+
+  /* Layout */
+  --nx-bottom-bar: 4.5rem; /* mobile bottom navigation height */
 }
 
 /* Explicit user choice overrides the OS (set by the theme logic in step 2). */
