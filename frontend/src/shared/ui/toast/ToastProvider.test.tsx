@@ -5,7 +5,6 @@ import { Button } from "@/shared/ui/Button";
 import { ToastProvider } from "./ToastProvider";
 import { useToast } from "./useToast";
 
-
 function ToastTriggers() {
   const toast = useToast();
   return (
@@ -73,7 +72,7 @@ describe("Toasts", () => {
     expect(trigger).toHaveFocus();
   });
 
-    it("dismisses a success after 5 seconds", () => {
+  it("dismisses a success after 5 seconds", () => {
     vi.useFakeTimers();
     renderWithToasts();
 
