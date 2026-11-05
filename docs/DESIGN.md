@@ -33,3 +33,12 @@ La palette par défaut de Tailwind est désactivée.
 - Focus visible au clavier sur tout élément interactif (`:focus-visible`).
 - Une information n'est jamais portée par la couleur seule.
 - Les animations sont désactivées si l'utilisateur l'a demandé (`prefers-reduced-motion`).
+
+## Thème
+
+- Par défaut, l'interface suit le thème du système (`color-scheme: light dark`).
+- Un choix explicite (clair ou sombre) est mémorisé dans `localStorage` (clé `nexus-theme`)
+  et appliqué par l'attribut `data-theme` de `<html>`.
+- Un script dans `index.html` applique ce choix avant le premier affichage, pour éviter
+  un flash de la mauvaise couleur.
+- Choisir « Système » efface le choix mémorisé.
