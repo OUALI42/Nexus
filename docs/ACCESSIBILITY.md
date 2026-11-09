@@ -27,6 +27,9 @@ Objectif : WCAG 2.2 niveau AA, plus des cibles de 44 px (critère 2.5.5, niveau 
 | Zoom à 200 % | Ctrl + molette | Pas de texte coupé, pas de défilement horizontal |
 | Mobile | Mode appareil de F12, 390 px de large | Barre du bas utilisable, contenu jamais caché |
 | Animations réduites | Paramètres Windows, Accessibilité, Effets visuels, Effets d'animation désactivés | Aucune animation |
+| Formulaire d'inscription | Envoi vide, puis correction au clavier | Focus sur le premier champ en erreur, erreurs annoncées sous chaque champ |
+| Mot de passe | Bouton afficher/masquer au clavier, saisie | État du bouton annoncé, force annoncée en mots |
+| Vérification de l'e-mail | Résultat de la confirmation | Focus sur le nouveau titre, action adaptée au cas |
 
 ### Script de vérification des cibles
 

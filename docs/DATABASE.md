@@ -8,6 +8,9 @@ Toutes les clés primaires sont des `BIGINT` auto-incrémentés (`DEFAULT_AUTO_F
 ```mermaid
 erDiagram
     USER ||--|| SUBSCRIPTION : has
+    USER ||--|| PROFILE : has
+    USER ||--o{ PRIVACY_CONSENT : accepts
+    USER ||--o{ EMAIL_VERIFICATION_TOKEN : receives
     PLAN ||--o{ SUBSCRIPTION : "applies to"
     USER ||--o{ SUBJECT : owns
     USER ||--o{ DOCUMENT : owns
@@ -43,14 +46,33 @@ erDiagram
         bigint id PK
         varchar email UK
         varchar password
-        varchar first_name
-        varchar last_name
-        varchar track
+        varchar first_name "optional"
+        varchar last_name "optional"
         varchar timezone
         bool is_email_verified
         bool is_active
         bool is_staff
         datetime date_joined
+    }
+        PROFILE {
+        bigint id PK
+        bigint user_id FK,UK
+        varchar username UK
+        varchar track
+    }
+    PRIVACY_CONSENT {
+        bigint id PK
+        bigint user_id FK
+        varchar policy_version
+        datetime accepted_at
+    }
+    EMAIL_VERIFICATION_TOKEN {
+        bigint id PK
+        bigint user_id FK
+        char token_hash UK
+        datetime created_at
+        datetime expires_at
+        datetime used_at
     }
     PLAN {
         bigint id PK
@@ -205,17 +227,38 @@ erDiagram
     }
 ```
 
-Toutes les tables métier ont aussi `created_at` et `updated_at` (via un modèle abstrait `TimeStampedModel`). Ces colonnes ne figurent pas dans le diagramme pour le garder lisible.
+Toutes les tables métier ont aussi `created_at` et `updated_at` (via un modèle abstrait `TimeStampedModel`), sauf `accounts_privacyconsent` et `accounts_emailverificationtoken`, qui portent leurs propres dates. Ces colonnes ne figurent pas dans le diagramme pour le garder lisible.
 
 ## Détail des tables
 
 ### `accounts_user`
 | Colonne | Type | Contraintes |
 |---|---|---|
-| email | VARCHAR(254) | UNIQUE, NOT NULL, identifiant de connexion |
-| track | VARCHAR(50) | NULL — filière (ex. « ECG ») |
+| email | VARCHAR(254) | UNIQUE, NOT NULL, identifiant de connexion, stocké en minuscules |
+| first_name, last_name | VARCHAR(150) | Facultatifs : non demandés à l'inscription (minimisation, ADR-017) |
 | timezone | VARCHAR(64) | défaut `Europe/Paris` |
-| is_email_verified | BOOL | défaut `false` |
+| is_email_verified | BOOL | défaut `false`, passe à `true` par la vérification de l'e-mail |
+
+La filière, présente ici en S1 sous forme de texte libre, a été déplacée dans `accounts_profile` en S4.
+
+### `accounts_profile`
+- `user_id` UNIQUE : un profil par utilisateur, créé dans la même transaction que le compte.
+- `username` : 3 à 30 caractères (lettres sans accent, chiffres, `.`, `-`, `_`).
+  Unicité **insensible à la casse** par un index unique sur `LOWER(username)` : « Ada » et « ada » ne peuvent pas coexister.
+- `track` : liste fermée (classes préparatoires, BTS, BUT, licence, master, écoles, autre),
+  définie dans `apps/accounts/tracks.py` et exposée par l'API pour le formulaire.
+- Le plan n'est pas stocké ici : il est porté par `billing_subscription` (ADR-017).
+
+### `accounts_privacyconsent`
+- Une ligne par version de la politique de confidentialité acceptée : preuve RGPD de la version et de la date.
+- `UNIQUE (user_id, policy_version)`.
+- La version en vigueur est définie dans les settings (`PRIVACY_POLICY_VERSION`).
+
+### `accounts_emailverificationtoken`
+- `token_hash` : empreinte SHA-256 du jeton envoyé par e-mail, UNIQUE (donc indexée).
+  Le jeton en clair n'est jamais stocké (ADR-016).
+- `expires_at` : 24 heures après la création. `used_at` : date d'utilisation, NULL tant que le lien n'a pas servi.
+- Un seul jeton non utilisé par utilisateur : en demander un nouveau supprime les précédents.
 
 ### `billing_plan` / `billing_subscription`
 - `plan.code` UNIQUE (`basic`, `intermediate`, `premium`) ; tarifs en **centimes** (entier, jamais de float pour de l'argent).
