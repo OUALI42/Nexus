@@ -1,12 +1,12 @@
-import { Link } from "react-router";
-
 import { PageHeader } from "@/shared/ui/PageHeader";
+
+import { RegisterForm } from "../components/RegisterForm";
 
 export function RegisterPage() {
   return (
     <>
       <PageHeader title="Créer mon compte" />
-      <Link to="/connexion">J'ai déjà un compte</Link>
+      <RegisterForm />
     </>
   );
 }

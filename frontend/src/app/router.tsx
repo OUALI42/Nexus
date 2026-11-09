@@ -12,6 +12,7 @@ import { PrivacyPolicyPage } from "@/features/auth/pages/PrivacyPolicyPage";
 import { RegisterPage } from "@/features/auth/pages/RegisterPage";
 import { AuthLayout } from "./layouts/AuthLayout";
 import { PublicLayout } from "./layouts/PublicLayout";
+import { CheckEmailPage } from "@/features/auth/pages/CheckEmailPage";
 
 // Every navigation entry except the dashboard gets a placeholder page for now.
 const placeholderRoutes = NAV_ITEMS.filter((item) => item.to !== "/").map(
@@ -30,6 +31,7 @@ export const routes: RouteObject[] = [
         children: [
           { path: "inscription", Component: RegisterPage },
           { path: "connexion", Component: LoginPage },
+          { path: "inscription/verification", Component: CheckEmailPage },
         ],
       },
       {

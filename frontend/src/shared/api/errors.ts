@@ -35,3 +35,24 @@ export class ApiError extends Error {
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError;
 }
+
+/** First message per field from a validation ApiError, e.g. { email: "…" }. */
+export function getFieldErrors(error: unknown): Record<string, string> {
+  if (!isApiError(error) || !error.details) {
+    return {};
+  }
+  const fieldErrors: Record<string, string> = {};
+  for (const [field, messages] of Object.entries(error.details)) {
+    const first = Array.isArray(messages)
+      ? messages.find(
+          (message): message is string => typeof message === "string",
+        )
+      : typeof messages === "string"
+        ? messages
+        : undefined;
+    if (first) {
+      fieldErrors[field] = first;
+    }
+  }
+  return fieldErrors;
+}

@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
-
-import { fetchPrivacyPolicy, fetchTracks } from "./api";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { fetchPrivacyPolicy, fetchTracks, registerAccount } from "./api";
 
 export const authKeys = {
   privacyPolicy: ["auth", "privacy-policy"] as const,
@@ -21,4 +20,8 @@ export function useTracks() {
     queryFn: ({ signal }) => fetchTracks(signal),
     staleTime: Infinity, // the list only changes with a new deployment
   });
+}
+
+export function useRegister() {
+  return useMutation({ mutationFn: registerAccount });
 }
