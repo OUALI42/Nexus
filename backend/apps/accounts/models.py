@@ -138,6 +138,10 @@ class EmailVerificationToken(models.Model):
     expires_at = models.DateTimeField()
     used_at = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        status = "utilisé" if self.used_at else "en attente"
+        return f"{self.user} — {status}"
+
     @property
     def is_expired(self) -> bool:
         return now() >= self.expires_at
