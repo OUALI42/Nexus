@@ -295,3 +295,63 @@ au clavier et une page active signalée autrement que par la couleur.
   doit être affiché après la fermeture de la modale.
 - Des composants plus complexes (liste déroulante avec recherche, sélecteur de date)
   pourront justifier une bibliothèque comme React Aria, via un nouvel ADR.
+
+
+## ADR-016 — Vérification de l'e-mail par jeton haché, à usage unique et expirant
+
+**Statut :** accepté.
+
+**Contexte.** La story S4 exige un e-mail de vérification contenant un lien à usage unique
+et expirant.
+
+**Décision.**
+- Un jeton aléatoire de 256 bits est généré avec le module `secrets`. Seule son empreinte
+  SHA-256 est stockée en base ; le jeton en clair n'existe que dans l'e-mail.
+- Le jeton expire au bout de 24 heures. Il est marqué comme utilisé lors de la vérification,
+  sous verrou de ligne (`select_for_update`), pour qu'une double requête ne puisse pas
+  l'utiliser deux fois. Demander un nouveau lien révoque les précédents.
+- Le lien ouvre une page du front-end. La vérification n'a lieu qu'au clic sur
+  « Confirmer mon adresse », par une requête POST protégée par CSRF.
+- L'e-mail n'est envoyé qu'après la validation de la transaction d'inscription (`on_commit`).
+- Le renvoi d'un lien répond de la même façon, que l'adresse existe ou non.
+
+**Alternatives écartées.**
+- Jeton signé sans stockage (`PasswordResetTokenGenerator` de Django) : pas de trace en
+  base, révocation des anciens liens et usage unique moins explicites.
+- Hachage du jeton avec Argon2 : inutile pour une valeur aléatoire de 256 bits, et
+  incompatible avec une recherche directe par empreinte.
+- Validation directe à l'ouverture du lien (GET) : les outils d'analyse des messageries
+  ouvrent les liens et consommeraient le jeton à la place de l'utilisateur.
+
+**Conséquences.**
+- Une fuite de la base ne permet pas de valider le compte d'un autre utilisateur.
+- L'envoi de l'e-mail ralentit la requête d'inscription : il passera par une tâche Celery
+  lorsque Celery sera en place.
+- Les jetons expirés s'accumulent : une purge périodique sera ajoutée avec Celery.
+
+## ADR-017 — Données d'inscription : minimisation et consentement versionné
+
+**Statut :** accepté.
+
+**Contexte.** La story S4 demande un profil (nom d'utilisateur unique, filière, plan) et un
+consentement RGPD dont la date et la version sont enregistrées.
+
+**Décision.**
+- L'inscription ne demande que l'e-mail, le mot de passe, le nom d'utilisateur et la
+  filière. Le prénom et le nom deviennent facultatifs (principe de minimisation du RGPD).
+- Le profil (`Profile`) porte le nom d'utilisateur, unique sans tenir compte de la casse,
+  et la filière, choisie dans une liste fermée. La filière est retirée du modèle `User`,
+  où elle était un texte libre depuis la S1.
+- Le plan reste dans `billing.Subscription` (créée automatiquement à l'inscription depuis
+  la S1) et sera exposé dans l'API du profil en lecture seule, pour éviter deux sources de vérité.
+- Chaque acceptation de la politique de confidentialité est un enregistrement
+  `PrivacyConsent` (version, date). La version en vigueur est définie côté serveur ;
+  une inscription faite avec une version périmée est refusée.
+
+**Alternatives écartées.**
+- Champ `plan` dans `Profile` : duplication de l'abonnement, avec un risque d'incohérence.
+- Date et version du consentement en champs de `Profile` : l'historique des versions
+  acceptées serait perdu à chaque mise à jour de la politique.
+
+**Conséquences.**
+- Une nouvelle version de

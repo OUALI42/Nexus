@@ -1,2 +1,2 @@
 export { api, apiRequest } from "./client";
-export { ApiError, isApiError } from "./errors";
+export { ApiError, getFieldErrors, isApiError } from "./errors";

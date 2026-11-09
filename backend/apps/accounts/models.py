@@ -1,10 +1,17 @@
+from django.conf import settings
 from django.contrib.auth.models import (
     AbstractBaseUser,
     BaseUserManager,
     PermissionsMixin,
 )
+from django.core.validators import RegexValidator
 from django.db import models
+from django.db.models.functions import Lower
 from django.utils.timezone import now
+
+from apps.core.models import TimeStampedModel
+
+from .tracks import Track
 
 
 class UserManager(BaseUserManager):
@@ -35,9 +42,8 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField("e-mail", unique=True)
-    first_name = models.CharField("prénom", max_length=150)
-    last_name = models.CharField("nom", max_length=150)
-    track = models.CharField("filière", max_length=50, blank=True)
+    first_name = models.CharField("prénom", max_length=150, blank=True)
+    last_name = models.CharField("nom", max_length=150, blank=True)
     timezone = models.CharField("fuseau horaire", max_length=64, default="Europe/Paris")
     is_email_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -48,7 +54,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name"]
+    REQUIRED_FIELDS = []
 
     class Meta:
         verbose_name = "utilisateur"
@@ -60,3 +66,82 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def full_name(self) -> str:
         return f"{self.first_name} {self.last_name}".strip()
+
+
+username_validator = RegexValidator(
+    regex=r"^[a-zA-Z0-9_.-]{3,30}$",
+    message=(
+        "Le nom d'utilisateur doit contenir de 3 à 30 caractères : "
+        "lettres sans accent, chiffres, points, tirets ou tirets bas."
+    ),
+)
+
+
+class Profile(TimeStampedModel):
+    """Public identity of a user. The plan lives in billing.Subscription."""
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile",
+    )
+    username = models.CharField(max_length=30, validators=[username_validator])
+    track = models.CharField(max_length=30, choices=Track.choices)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                Lower("username"),
+                name="accounts_profile_username_ci_unique",
+                violation_error_message="Ce nom d'utilisateur est déjà pris.",
+            ),
+        ]
+
+    def __str__(self):
+        return self.username
+
+
+class PrivacyConsent(models.Model):
+    """Proof that a user accepted a given version of the privacy policy."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="privacy_consents",
+    )
+    policy_version = models.CharField(max_length=20)
+    accepted_at = models.DateTimeField(default=now)
+
+    class Meta:
+        ordering = ["-accepted_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "policy_version"],
+                name="accounts_privacyconsent_user_version_unique",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.user} — v{self.policy_version}"
+
+
+class EmailVerificationToken(models.Model):
+    """Single-use, expiring token. Only its SHA-256 hash is stored."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="email_verification_tokens",
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(default=now)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        status = "utilisé" if self.used_at else "en attente"
+        return f"{self.user} — {status}"
+
+    @property
+    def is_expired(self) -> bool:
+        return now() >= self.expires_at

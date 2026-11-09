@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -212,3 +213,11 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+
+# --- Privacy policy ---
+# Bump this value when the policy changes: users must accept the new version.
+PRIVACY_POLICY_VERSION = "2026-11"
+
+# --- Email verification ---
+FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
+EMAIL_VERIFICATION_TOKEN_TTL = timedelta(hours=24)

@@ -1,0 +1,11 @@
+Bonjour {{ username }},
+
+Bienvenue sur Nexus ! Pour activer ton compte, confirme ton adresse e-mail en ouvrant ce lien :
+
+{{ link }}
+
+Ce lien est valable {{ ttl_hours }} heures et ne peut être utilisé qu'une seule fois.
+
+Si tu n'as pas créé de compte sur Nexus, ignore simplement ce message.
+
+L'équipe Nexus

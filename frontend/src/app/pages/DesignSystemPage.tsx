@@ -4,9 +4,11 @@ import { Input } from "@/shared/ui/Input";
 import { useState } from "react";
 import { Modal } from "@/shared/ui/Modal";
 import { useToast } from "@/shared/ui/toast/useToast";
+import { PasswordInput } from "@/features/auth/components/PasswordInput";
 
 export function DesignSystemPage() {
   const [isModalOpen, setModalOpen] = useState(false);
+  const [password, setPassword] = useState("");
   const toast = useToast();
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-10 p-8">
@@ -91,6 +93,16 @@ export function DesignSystemPage() {
           }
         >
           <Input label="Tape le nom du casier pour confirmer" />
+          <PasswordInput
+            label="Mot de passe (avec force)"
+            hint="10 caractères minimum. Une phrase de passe est plus sûre et plus facile à retenir."
+            autoComplete="new-password"
+            showStrength
+            value={password}
+            onChange={(event) => {
+              setPassword(event.target.value);
+            }}
+          />
         </Modal>
       </section>
 

@@ -28,6 +28,7 @@
   /* Feedback */
   --nx-danger: light-dark(#b91c1c, #fca5a5);
   --nx-success: light-dark(#166534, #86efac);
+  --nx-warning: light-dark(#9a3412, #fdba74);
 
   /* Focus */
   --nx-focus: light-dark(#6d28d9, #a78bfa);
@@ -86,6 +87,7 @@
   --color-ai-strong: var(--nx-ai-strong);
   --color-danger: var(--nx-danger);
   --color-success: var(--nx-success);
+  --color-warning: var(--nx-warning);
   --color-focus: var(--nx-focus);
   --color-nav-from: var(--nx-nav-from);
   --color-nav-via: var(--nx-nav-via);

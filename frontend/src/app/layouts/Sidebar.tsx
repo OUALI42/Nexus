@@ -3,6 +3,7 @@ import { NavLink } from "react-router";
 import { NAV_ITEMS, SETTINGS_PATH, type NavItem } from "@/app/navigation";
 import { cx } from "@/shared/lib/cx";
 import { ThemeSwitcher } from "@/shared/theme/ThemeSwitcher";
+import { Logo } from "@/shared/ui/Logo";
 
 export function Sidebar() {
   const mainItems = NAV_ITEMS.filter((item) => item.to !== SETTINGS_PATH);
@@ -10,25 +11,7 @@ export function Sidebar() {
 
   return (
     <aside className="sticky top-4 m-4 hidden h-[calc(100dvh-2rem)] w-sidebar shrink-0 flex-col gap-4 overflow-y-auto rounded-nav bg-linear-to-b from-nav-from via-nav-via to-nav-to p-4 text-nav-text md:flex">
-      <p className="flex items-center gap-2.5 px-3.5 pt-2 pb-4 text-2xl font-extrabold text-on-brand">
-        <svg
-          aria-hidden="true"
-          width="28"
-          height="28"
-          viewBox="0 0 28 28"
-          fill="none"
-          className="stroke-nav-accent"
-          strokeWidth={2}
-        >
-          <circle cx="14" cy="14" r="4" />
-          <circle cx="5" cy="6" r="2.5" />
-          <circle cx="23" cy="8" r="2.5" />
-          <circle cx="19" cy="23" r="2.5" />
-          <path d="M11 12 7 8M18 12l3-3M15.5 18l2.5 3" />
-        </svg>
-        Nexus
-      </p>
-
+      <Logo className="px-3.5 pt-2 pb-4 text-2xl text-on-brand" />
       <nav aria-label="Navigation principale" className="flex flex-1 flex-col">
         <ul className="flex flex-col gap-1.5">
           {mainItems.map((item) => (

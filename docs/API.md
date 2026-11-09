@@ -189,3 +189,24 @@ Paramètres : `?page=` et `?page_size=` (20 par défaut, 100 au maximum).
 | `user` | 120/min |
 | `auth` (login, register, reset) | 5/min par IP |
 | `ai` (endpoints `Quota` IA) | 10/min |
+
+
+
+### Authentification — inscription (S4)
+
+| Méthode | Endpoint | Permission | CSRF | Débit | Réponse |
+| --- | --- | --- | --- | --- | --- |
+| GET | `/api/v1/auth/csrf/` | Public | — | — | 204, cookie `csrftoken` |
+| POST | `/api/v1/auth/register/` | Public | Exigé | `auth` | 201 `{email, username, track}` |
+| GET | `/api/v1/auth/tracks/` | Public | — | — | 200 `[{label, options: [{value, label}]}]` |
+| GET | `/api/v1/auth/privacy-policy/` | Public | — | — | 200 `{version}` |
+| POST | `/api/v1/auth/verify-email/` | Public | Exigé | `auth` | 204 |
+| POST | `/api/v1/auth/resend-verification/` | Public | Exigé | `auth` | 202, quelle que soit l'adresse |
+
+**Inscription — corps de la requête :** `email`, `password`, `username`, `track`,
+`privacy_policy_accepted` (doit valoir `true`), `privacy_policy_version` (doit être la
+version en vigueur). Le mot de passe n'est jamais renvoyé.
+
+**Erreurs de validation :** format unique, une entrée par champ dans `details`.
+
+**Vérification — codes d'erreur :** `token_invalid`, `token_used`, `token_expired` (400).

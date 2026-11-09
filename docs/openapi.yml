@@ -17,6 +17,128 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/auth/privacy-policy/:
+    get:
+      operationId: auth_privacy_policy_retrieve
+      summary: Current privacy policy version
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivacyPolicy'
+          description: ''
+  /api/v1/auth/register/:
+    post:
+      operationId: auth_register_create
+      description: |-
+        DRF only enforces CSRF for authenticated users. Views reachable while
+        logged out (register, login) must enforce it explicitly, otherwise an
+        attacker's site could submit them in the victim's browser (login CSRF).
+      summary: Create an account
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/v1/auth/resend-verification/:
+    post:
+      operationId: auth_resend_verification_create
+      description: |-
+        DRF only enforces CSRF for authenticated users. Views reachable while
+        logged out (register, login) must enforce it explicitly, otherwise an
+        attacker's site could submit them in the victim's browser (login CSRF).
+      summary: Send a new verification link (same answer for any address)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '202':
+          description: No response body
+  /api/v1/auth/tracks/:
+    get:
+      operationId: auth_tracks_list
+      summary: List tracks, grouped
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrackGroup'
+          description: ''
+  /api/v1/auth/verify-email/:
+    post:
+      operationId: auth_verify_email_create
+      description: |-
+        DRF only enforces CSRF for authenticated users. Views reachable while
+        logged out (register, login) must enforce it explicitly, otherwise an
+        attacker's site could submit them in the victim's browser (login CSRF).
+      summary: Verify an email address with a single-use token
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
   /api/v1/health/:
     get:
       operationId: health_retrieve
@@ -44,6 +166,135 @@ components:
       required:
       - database
       - status
+    PrivacyPolicy:
+      type: object
+      properties:
+        version:
+          type: string
+      required:
+      - version
+    Register:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        username:
+          type: string
+          pattern: ^[a-zA-Z0-9_.-]{3,30}$
+          maxLength: 30
+        track:
+          $ref: '#/components/schemas/TrackEnum'
+      required:
+      - email
+      - track
+      - username
+    RegisterRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        username:
+          type: string
+          minLength: 1
+          pattern: ^[a-zA-Z0-9_.-]{3,30}$
+          maxLength: 30
+        track:
+          $ref: '#/components/schemas/TrackEnum'
+        privacy_policy_accepted:
+          type: boolean
+          writeOnly: true
+        privacy_policy_version:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 20
+      required:
+      - email
+      - password
+      - privacy_policy_accepted
+      - privacy_policy_version
+      - track
+      - username
+    ResendVerificationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    TrackEnum:
+      enum:
+      - mpsi
+      - mp2i
+      - pcsi
+      - ptsi
+      - tsi
+      - bcpst
+      - tb
+      - ecg
+      - ect
+      - hk_al
+      - hk_bl
+      - bts
+      - but
+      - licence
+      - master
+      - engineering_school
+      - business_school
+      - other
+      type: string
+      description: |-
+        * `mpsi` - MPSI
+        * `mp2i` - MP2I
+        * `pcsi` - PCSI
+        * `ptsi` - PTSI
+        * `tsi` - TSI
+        * `bcpst` - BCPST
+        * `tb` - TB
+        * `ecg` - ECG
+        * `ect` - ECT
+        * `hk_al` - Hypokhâgne / Khâgne A/L
+        * `hk_bl` - Hypokhâgne / Khâgne B/L
+        * `bts` - BTS
+        * `but` - BUT
+        * `licence` - Licence
+        * `master` - Master
+        * `engineering_school` - École d'ingénieurs
+        * `business_school` - École de commerce
+        * `other` - Autre
+    TrackGroup:
+      type: object
+      properties:
+        label:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+      required:
+      - label
+      - options
+    VerifyEmailRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - token
   securitySchemes:
     cookieAuth:
       type: apiKey

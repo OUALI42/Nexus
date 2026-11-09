@@ -10,6 +10,7 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True  # header only; submission to the preload list is manual
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
+FRONTEND_URL = env("FRONTEND_URL")
 
 
 # API docs are restricted to staff in production (log in through the admin first)
