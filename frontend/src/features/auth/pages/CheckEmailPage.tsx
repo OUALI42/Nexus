@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router";
 import { z } from "zod";
-
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { ResendVerificationForm } from "../components/ResendVerificationForm";
 
 const navigationStateSchema = z.object({ email: z.string() });
 
@@ -28,6 +28,10 @@ export function CheckEmailPage() {
           Le lien est valable 24 heures. Pense à vérifier tes courriers
           indésirables.
         </p>
+        <section className="flex flex-col gap-3 rounded-card border border-line bg-surface p-5">
+          <h2 className="text-lg font-bold">Tu n'as rien reçu ?</h2>
+          <ResendVerificationForm initialEmail={email} />
+        </section>
         <Link
           to="/connexion"
           className="inline-flex min-h-tap items-center self-start"

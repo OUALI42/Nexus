@@ -60,3 +60,11 @@ export function registerAccount(
     registeredUserSchema,
   );
 }
+
+export function verifyEmail(token: string): Promise<undefined> {
+  return api.post("/auth/verify-email/", { token }, z.undefined());
+}
+
+export function resendVerification(email: string): Promise<undefined> {
+  return api.post("/auth/resend-verification/", { email }, z.undefined());
+}

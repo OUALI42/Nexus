@@ -1,5 +1,11 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { fetchPrivacyPolicy, fetchTracks, registerAccount } from "./api";
+import {
+  fetchPrivacyPolicy,
+  fetchTracks,
+  registerAccount,
+  resendVerification,
+  verifyEmail,
+} from "./api";
 
 export const authKeys = {
   privacyPolicy: ["auth", "privacy-policy"] as const,
@@ -24,4 +30,12 @@ export function useTracks() {
 
 export function useRegister() {
   return useMutation({ mutationFn: registerAccount });
+}
+
+export function useVerifyEmail() {
+  return useMutation({ mutationFn: verifyEmail });
+}
+
+export function useResendVerification() {
+  return useMutation({ mutationFn: resendVerification });
 }
