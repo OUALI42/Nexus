@@ -123,3 +123,21 @@ class PrivacyConsent(models.Model):
 
     def __str__(self):
         return f"{self.user} — v{self.policy_version}"
+
+
+class EmailVerificationToken(models.Model):
+    """Single-use, expiring token. Only its SHA-256 hash is stored."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="email_verification_tokens",
+    )
+    token_hash = models.CharField(max_length=64, unique=True)
+    created_at = models.DateTimeField(default=now)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    @property
+    def is_expired(self) -> bool:
+        return now() >= self.expires_at

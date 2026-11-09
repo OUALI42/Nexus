@@ -96,3 +96,11 @@ class TrackGroupSerializer(serializers.Serializer):
 
 class PrivacyPolicySerializer(serializers.Serializer):
     version = serializers.CharField()
+
+
+class VerifyEmailSerializer(serializers.Serializer):
+    token = serializers.CharField(max_length=100)
+
+
+class ResendVerificationSerializer(serializers.Serializer):
+    email = serializers.EmailField()

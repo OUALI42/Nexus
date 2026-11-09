@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
@@ -5,15 +6,19 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.conf import settings
 from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.views import APIView
+
 from apps.core.mixins import CsrfProtectedMixin
+
 from .serializers import (
     PrivacyPolicySerializer,
     RegisterSerializer,
+    ResendVerificationSerializer,
     TrackGroupSerializer,
+    VerifyEmailSerializer,
 )
+from .services import resend_email_verification, verify_email
 from .tracks import TRACK_GROUPS
 
 
@@ -72,3 +77,37 @@ class PrivacyPolicyView(APIView):
     )
     def get(self, request: Request) -> Response:
         return Response({"version": settings.PRIVACY_POLICY_VERSION})
+
+
+class VerifyEmailView(CsrfProtectedMixin, APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth"
+
+    @extend_schema(
+        request=VerifyEmailSerializer,
+        responses={204: None},
+        summary="Verify an email address with a single-use token",
+    )
+    def post(self, request: Request) -> Response:
+        serializer = VerifyEmailSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        verify_email(serializer.validated_data["token"])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ResendVerificationView(CsrfProtectedMixin, APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth"
+
+    @extend_schema(
+        request=ResendVerificationSerializer,
+        responses={202: None},
+        summary="Send a new verification link (same answer for any address)",
+    )
+    def post(self, request: Request) -> Response:
+        serializer = ResendVerificationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        resend_email_verification(serializer.validated_data["email"])
+        return Response(status=status.HTTP_202_ACCEPTED)

@@ -65,6 +65,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/Register'
           description: ''
+  /api/v1/auth/resend-verification/:
+    post:
+      operationId: auth_resend_verification_create
+      description: |-
+        DRF only enforces CSRF for authenticated users. Views reachable while
+        logged out (register, login) must enforce it explicitly, otherwise an
+        attacker's site could submit them in the victim's browser (login CSRF).
+      summary: Send a new verification link (same answer for any address)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendVerificationRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '202':
+          description: No response body
   /api/v1/auth/tracks/:
     get:
       operationId: auth_tracks_list
@@ -83,6 +111,34 @@ paths:
                 items:
                   $ref: '#/components/schemas/TrackGroup'
           description: ''
+  /api/v1/auth/verify-email/:
+    post:
+      operationId: auth_verify_email_create
+      description: |-
+        DRF only enforces CSRF for authenticated users. Views reachable while
+        logged out (register, login) must enforce it explicitly, otherwise an
+        attacker's site could submit them in the victim's browser (login CSRF).
+      summary: Verify an email address with a single-use token
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyEmailRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
   /api/v1/health/:
     get:
       operationId: health_retrieve
@@ -168,6 +224,15 @@ components:
       - privacy_policy_version
       - track
       - username
+    ResendVerificationRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
     TrackEnum:
       enum:
       - mpsi
@@ -221,6 +286,15 @@ components:
       required:
       - label
       - options
+    VerifyEmailRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - token
   securitySchemes:
     cookieAuth:
       type: apiKey
