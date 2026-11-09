@@ -67,6 +67,8 @@ const PAIRS: [string, string, number][] = [
   ["nav-focus", "nav-via", UI],
   ["nav-focus", "nav-to", UI],
   ["surface", "danger", TEXT],
+  ["warning", "canvas", TEXT],
+  ["warning", "surface", TEXT],
 ];
 
 const themes = parseTokens(tokensCss);
