@@ -212,3 +212,7 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
+
+# --- Privacy policy ---
+# Bump this value when the policy changes: users must accept the new version.
+PRIVACY_POLICY_VERSION = "2026-11"
