@@ -83,7 +83,6 @@ export function IdleSessionManager({
     });
   }, [logOut, queryClient, navigate]);
 
-
   // The idle countdown starts when the component appears.
   useEffect(() => {
     const now = Date.now();
