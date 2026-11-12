@@ -57,7 +57,9 @@ function registerRequestBody(fetchMock: ReturnType<typeof mockApi>) {
 
 async function fillValidForm(user: ReturnType<typeof userEvent.setup>) {
   await user.type(
-    await screen.findByRole("textbox", { name: "Adresse e-mail (obligatoire)" }),
+    await screen.findByRole("textbox", {
+      name: "Adresse e-mail (obligatoire)",
+    }),
     "ada@example.com",
   );
   await user.type(

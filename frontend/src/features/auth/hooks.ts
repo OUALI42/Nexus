@@ -7,7 +7,12 @@ import {
   verifyEmail,
   completeOnboarding,
   fetchSession,
+  logIn,
 } from "./api";
+
+export function useLogin() {
+  return useMutation({ mutationFn: logIn });
+}
 
 export const authKeys = {
   privacyPolicy: ["auth", "privacy-policy"] as const,

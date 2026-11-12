@@ -24,7 +24,9 @@ describe("Auth layout", () => {
     const user = userEvent.setup();
     renderApp("/inscription");
 
-    await user.click(await screen.findByRole("link", { name: "J'ai déjà un compte" }));
+    await user.click(
+      await screen.findByRole("link", { name: "J'ai déjà un compte" }),
+    );
 
     expect(
       await screen.findByRole("heading", { level: 1, name: "Connexion" }),

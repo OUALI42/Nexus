@@ -17,6 +17,7 @@ import { VerifyEmailPage } from "@/features/auth/pages/VerifyEmailPage";
 import { RedirectIfAuthenticated } from "@/features/auth/components/RedirectIfAuthenticated";
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { OnboardingPage } from "@/features/auth/pages/OnboardingPage";
+import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 
 // Every navigation entry except the dashboard gets a placeholder page for now.
 const placeholderRoutes = NAV_ITEMS.filter((item) => item.to !== "/").map(
@@ -39,6 +40,7 @@ export const routes: RouteObject[] = [
             children: [
               { path: "inscription", Component: RegisterPage },
               { path: "connexion", Component: LoginPage },
+              { path: "mot-de-passe-oublie", Component: ForgotPasswordPage },
             ],
           },
         ],
