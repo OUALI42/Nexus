@@ -87,6 +87,7 @@ class Profile(TimeStampedModel):
     )
     username = models.CharField(max_length=30, validators=[username_validator])
     track = models.CharField(max_length=30, choices=Track.choices)
+    onboarding_completed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         constraints = [

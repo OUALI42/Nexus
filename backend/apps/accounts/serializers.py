@@ -104,3 +104,28 @@ class VerifyEmailSerializer(serializers.Serializer):
 
 class ResendVerificationSerializer(serializers.Serializer):
     email = serializers.EmailField()
+
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+
+class PlanSummarySerializer(serializers.Serializer):
+    code = serializers.CharField()
+    name = serializers.CharField()
+
+
+class SessionUserSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    username = serializers.CharField(allow_null=True)
+    track = serializers.CharField(allow_null=True)
+    plan = PlanSummarySerializer(allow_null=True)
+    needs_onboarding = serializers.BooleanField()
+
+
+class SessionSerializer(serializers.Serializer):
+    authenticated = serializers.BooleanField()
+    user = SessionUserSerializer(allow_null=True)
+    idle_timeout = serializers.IntegerField()
+    idle_warning = serializers.IntegerField()

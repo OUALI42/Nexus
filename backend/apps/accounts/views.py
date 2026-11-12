@@ -3,7 +3,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -11,14 +11,23 @@ from rest_framework.views import APIView
 
 from apps.core.mixins import CsrfProtectedMixin
 
+from .selectors import session_payload
 from .serializers import (
+    LoginSerializer,
     PrivacyPolicySerializer,
     RegisterSerializer,
     ResendVerificationSerializer,
+    SessionSerializer,
     TrackGroupSerializer,
     VerifyEmailSerializer,
 )
-from .services import resend_email_verification, verify_email
+from .services import (
+    complete_onboarding,
+    log_in,
+    log_out,
+    resend_email_verification,
+    verify_email,
+)
 from .tracks import TRACK_GROUPS
 
 
@@ -111,3 +120,47 @@ class ResendVerificationView(CsrfProtectedMixin, APIView):
         serializer.is_valid(raise_exception=True)
         resend_email_verification(serializer.validated_data["email"])
         return Response(status=status.HTTP_202_ACCEPTED)
+
+
+class LoginView(CsrfProtectedMixin, APIView):
+    permission_classes = [AllowAny]
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "auth"
+
+    @extend_schema(
+        request=LoginSerializer,
+        responses={200: SessionSerializer},
+        summary="Log in (session cookie)",
+    )
+    def post(self, request: Request) -> Response:
+        serializer = LoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        # Django's HttpRequest, not DRF's wrapper: axes and login() need it.
+        user = log_in(request._request, **serializer.validated_data)
+        return Response(session_payload(user))
+
+
+class LogoutView(CsrfProtectedMixin, APIView):
+    permission_classes = [AllowAny]  # logging out twice is harmless
+
+    @extend_schema(request=None, responses={204: None}, summary="Log out")
+    def post(self, request: Request) -> Response:
+        log_out(request._request)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SessionView(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(responses={200: SessionSerializer}, summary="Current session")
+    def get(self, request: Request) -> Response:
+        return Response(session_payload(request.user))
+
+
+class CompleteOnboardingView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=None, responses={204: None}, summary="Finish onboarding")
+    def post(self, request: Request) -> Response:
+        complete_onboarding(request.user)
+        return Response(status=status.HTTP_204_NO_CONTENT)
