@@ -1,13 +1,21 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
-
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { expectNoAxeViolations } from "@/test/axe";
 import { renderApp } from "@/test/renderApp";
+import { jsonResponse, mockFetch } from "@/test/mockFetch";
+import { authenticatedSession } from "@/test/sessions";
 
+beforeEach(() => {
+  mockFetch({ "/auth/session/": () => jsonResponse(authenticatedSession()) });
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 // Without CSS, jsdom shows both navigations: the sidebar one comes first.
-function getSidebarNav() {
-  const [sidebar] = screen.getAllByRole("navigation", {
+async function findSidebarNav() {
+  const [sidebar] = await screen.findAllByRole("navigation", {
     name: "Navigation principale",
   });
   if (!sidebar) {
@@ -37,7 +45,7 @@ describe("Layout and navigation", () => {
 
   it("marks the current page for assistive technologies", async () => {
     renderApp("/casiers");
-    const nav = getSidebarNav();
+    const nav = await findSidebarNav();
 
     expect(
       await within(nav).findByRole("link", { name: "Mes casiers" }),
@@ -50,7 +58,7 @@ describe("Layout and navigation", () => {
   it("moves the focus to the new page title after navigating", async () => {
     const user = userEvent.setup();
     renderApp("/casiers");
-    const nav = getSidebarNav();
+    const nav = await findSidebarNav();
 
     await user.click(within(nav).getByRole("link", { name: "QCM" }));
 

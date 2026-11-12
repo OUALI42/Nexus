@@ -5,11 +5,14 @@ import {
   registerAccount,
   resendVerification,
   verifyEmail,
+  completeOnboarding,
+  fetchSession,
 } from "./api";
 
 export const authKeys = {
   privacyPolicy: ["auth", "privacy-policy"] as const,
   tracks: ["auth", "tracks"] as const,
+  session: ["auth", "session"] as const,
 };
 
 export function usePrivacyPolicy() {
@@ -38,4 +41,16 @@ export function useVerifyEmail() {
 
 export function useResendVerification() {
   return useMutation({ mutationFn: resendVerification });
+}
+
+export function useSession() {
+  return useQuery({
+    queryKey: authKeys.session,
+    queryFn: ({ signal }) => fetchSession(signal),
+    staleTime: 60_000,
+  });
+}
+
+export function useCompleteOnboarding() {
+  return useMutation({ mutationFn: completeOnboarding });
 }

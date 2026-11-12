@@ -9,6 +9,7 @@ describe("Auth layout", () => {
   it("offers a skip link and a link to log in from the sign-up page", async () => {
     const user = userEvent.setup();
     renderApp("/inscription");
+    await screen.findByRole("heading", { level: 1, name: "Créer mon compte" });
 
     await user.tab();
     expect(
@@ -23,7 +24,7 @@ describe("Auth layout", () => {
     const user = userEvent.setup();
     renderApp("/inscription");
 
-    await user.click(screen.getByRole("link", { name: "J'ai déjà un compte" }));
+    await user.click(await screen.findByRole("link", { name: "J'ai déjà un compte" }));
 
     expect(
       await screen.findByRole("heading", { level: 1, name: "Connexion" }),
