@@ -27,7 +27,10 @@ def session_payload(user) -> dict:
             if subscription
             else None
         ),
-        # Accounts created before S4 have no profile: onboarding creates it later.
-        "needs_onboarding": profile is None or profile.onboarding_completed_at is None,
+        # Only users with a profile go through the onboarding. Accounts created
+        # before S4 (e.g. the S1 superuser) have none: no endless redirect.
+        "needs_onboarding": (
+            profile is not None and profile.onboarding_completed_at is None
+        ),
     }
     return payload

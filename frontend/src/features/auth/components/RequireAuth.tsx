@@ -1,9 +1,8 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-
 import { Button } from "@/shared/ui/Button";
 import { FullPageStatus } from "@/shared/ui/FullPageStatus";
-
 import { useSession } from "../hooks";
+import { IdleSessionManager } from "./IdleSessionManager";
 
 export const ONBOARDING_PATH = "/bienvenue";
 
@@ -54,5 +53,13 @@ export function RequireAuth() {
     return <Navigate to="/" replace />;
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <IdleSessionManager
+        timeoutSeconds={session.data.idleTimeout}
+        warningSeconds={session.data.idleWarning}
+      />
+    </>
+  );
 }

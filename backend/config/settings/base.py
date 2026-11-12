@@ -208,6 +208,8 @@ SESSION_COOKIE_SAMESITE = "Lax"
 # --- Inactivity timeout (single source of truth, also sent to the front-end) ---
 SESSION_IDLE_TIMEOUT = 30 * 60  # seconds without activity before logout
 SESSION_IDLE_WARNING = 2 * 60  # seconds of warning before that logout
+# SESSION_IDLE_TIMEOUT = 60  # TEMPORARY: 1 minute for testing
+# SESSION_IDLE_WARNING = 30
 
 SESSION_COOKIE_AGE = SESSION_IDLE_TIMEOUT
 SESSION_SAVE_EVERY_REQUEST = True  # each request pushes the expiry back
