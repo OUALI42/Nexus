@@ -204,7 +204,14 @@ MEDIA_ROOT = BASE_DIR / "media"
 # --- Session & CSRF ---
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # 2 weeks
+
+# --- Inactivity timeout (single source of truth, also sent to the front-end) ---
+SESSION_IDLE_TIMEOUT = 30 * 60  # seconds without activity before logout
+SESSION_IDLE_WARNING = 2 * 60  # seconds of warning before that logout
+
+SESSION_COOKIE_AGE = SESSION_IDLE_TIMEOUT
+SESSION_SAVE_EVERY_REQUEST = True  # each request pushes the expiry back
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 CSRF_COOKIE_HTTPONLY = False  # the SPA must read it to send X-CSRFToken
 CSRF_COOKIE_SAMESITE = "Lax"
@@ -240,3 +247,11 @@ AXES_RESET_ON_SUCCESS = True
 AXES_USERNAME_FORM_FIELD = "email"
 AXES_ENABLE_ACCESS_FAILURE_LOG = True  # one row per failed attempt
 AXES_LOCKOUT_CALLABLE = "apps.accounts.lockout.lockout_response"
+
+# --- Cache (Redis): sessions, throttling counters ---
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": env("REDIS_URL", default="redis://redis:6379/0"),
+    }
+}

@@ -6,3 +6,4 @@ djangorestframework>=3.16
 drf-spectacular>=0.28
 django-filter>=25.1
 django-axes[ipware]==9.0.0
+redis==8.1.0

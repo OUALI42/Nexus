@@ -9,3 +9,7 @@ DATABASES["default"]["TEST"] = {
     "CHARSET": "utf8mb4",
     "COLLATION": "utf8mb4_0900_ai_ci",
 }
+
+CACHES = {
+    "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"},
+}
