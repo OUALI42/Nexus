@@ -38,8 +38,9 @@ export function IdleSessionManager({
   const navigate = useNavigate();
   const { mutate: logOut } = useLogout();
 
-  const lastActivity = useRef(Date.now());
-  const lastKeepAlive = useRef(Date.now());
+  // Set on mount (see the effect below): render must stay pure.
+  const lastActivity = useRef(0);
+  const lastKeepAlive = useRef(0);
   const lastStorageWrite = useRef(0);
   const isLoggingOut = useRef(false);
   // null: no warning displayed; otherwise, seconds before logout.
@@ -81,6 +82,14 @@ export function IdleSessionManager({
       },
     });
   }, [logOut, queryClient, navigate]);
+
+
+  // The idle countdown starts when the component appears.
+  useEffect(() => {
+    const now = Date.now();
+    lastActivity.current = now;
+    lastKeepAlive.current = now;
+  }, []);
 
   // User activity in this tab (ignored while the warning is open:
   // only an explicit choice closes it).
