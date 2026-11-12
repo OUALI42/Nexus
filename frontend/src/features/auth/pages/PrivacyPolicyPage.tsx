@@ -87,6 +87,13 @@ export function PrivacyPolicyPage() {
             effacées définitivement. Les liens de vérification d'adresse e-mail
             expirent au bout de 24 heures.
           </p>
+
+          <p>
+            Pour protéger les comptes contre les tentatives d'intrusion, les
+            connexions et les échecs de connexion (adresse e-mail saisie,
+            adresse IP, navigateur, date) sont enregistrés et conservés 30
+            jours.
+          </p>
         </Section>
 
         <Section title="Cookies">

@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "apps.assistant",
     "apps.notifications",
     "apps.progress",
+    "axes",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -112,6 +113,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -221,3 +223,20 @@ PRIVACY_POLICY_VERSION = "2026-11"
 # --- Email verification ---
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
 EMAIL_VERIFICATION_TOKEN_TTL = timedelta(hours=24)
+
+
+# --- Login attempts (django-axes) ---
+AUTHENTICATION_BACKENDS = [
+    # Must come first: refuses authentication while locked out.
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(minutes=15)
+# Lock the (email, IP) pair: an attacker cannot lock someone else's account.
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+AXES_RESET_ON_SUCCESS = True
+AXES_USERNAME_FORM_FIELD = "email"
+AXES_ENABLE_ACCESS_FAILURE_LOG = True  # one row per failed attempt
+AXES_LOCKOUT_CALLABLE = "apps.accounts.lockout.lockout_response"
