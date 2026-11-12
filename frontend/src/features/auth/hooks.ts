@@ -1,4 +1,5 @@
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
 import {
   fetchPrivacyPolicy,
   fetchTracks,
@@ -8,7 +9,24 @@ import {
   completeOnboarding,
   fetchSession,
   logIn,
+  logOut,
 } from "./api";
+
+export type LogoutReason = "logout" | "inactivity";
+
+export function useLogout() {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationFn: logOut,
+    onSuccess: (_data, reason: LogoutReason = "logout") => {
+      // Forget everything cached for this user (shared computers).
+      queryClient.clear();
+      void navigate("/connexion", { replace: true, state: { reason } });
+    },
+  });
+}
 
 export function useLogin() {
   return useMutation({ mutationFn: logIn });

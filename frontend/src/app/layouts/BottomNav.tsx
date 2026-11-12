@@ -6,6 +6,7 @@ import { NAV_ITEMS } from "@/app/navigation";
 import { cx } from "@/shared/lib/cx";
 import { ThemeSwitcher } from "@/shared/theme/ThemeSwitcher";
 import { Modal } from "@/shared/ui/Modal";
+import { LogoutButton } from "@/features/auth/components/LogoutButton";
 
 const TAB =
   "relative flex min-h-tap w-full flex-col items-center justify-center gap-1 text-xs font-semibold text-fg-muted no-underline";
@@ -118,6 +119,7 @@ export function BottomNav() {
             })}
           </ul>
           <ThemeSwitcher />
+          <LogoutButton className="text-fg hover:bg-surface-muted" />
         </div>
       </Modal>
     </>
