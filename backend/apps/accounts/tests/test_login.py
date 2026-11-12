@@ -118,9 +118,7 @@ def test_anonymous_session_exposes_the_idle_timeout(api_client):
     assert body["idle_warning"] == 2 * 60
 
 
-def test_an_account_without_profile_is_not_stuck_in_the_onboarding(
-    user, csrf_post
-):
+def test_an_account_without_profile_is_not_stuck_in_the_onboarding(user, csrf_post):
     # Accounts created before S4 (e.g. the S1 superuser) have no profile.
     user.is_email_verified = True
     user.save(update_fields=["is_email_verified"])

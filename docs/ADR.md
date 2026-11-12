@@ -355,3 +355,67 @@ consentement RGPD dont la date et la version sont enregistrées.
 
 **Conséquences.**
 - Une nouvelle version de
+
+## ADR-018 — Connexion : protection contre les attaques et conditions d'accès
+
+**Statut :** accepté.
+
+**Contexte.** La story S5 exige un message générique en cas d'identifiants invalides, un
+blocage temporaire après 5 échecs avec un message neutre, et la journalisation des tentatives.
+
+**Décision.**
+- django-axes bloque le couple **e-mail + adresse IP** pendant 15 minutes après 5 échecs.
+  Le compteur est remis à zéro après une connexion réussie. L'e-mail est mis en minuscules
+  avant la vérification, pour qu'une variation de casse ne crée pas un second compteur.
+- La réponse de blocage est un JSON au format d'erreur unique (`too_many_attempts`, 429,
+  en-tête `Retry-After`), identique que l'adresse existe ou non.
+- Un e-mail inconnu et un mauvais mot de passe reçoivent la même réponse
+  (`invalid_credentials`, 401).
+- Chaque échec est journalisé (e-mail saisi, IP, navigateur, date). Les journaux sont
+  conservés 30 jours, ce qu'indique la politique de confidentialité.
+- La connexion est refusée tant que l'adresse e-mail n'est pas vérifiée
+  (`email_not_verified`, 403). Ce message n'est renvoyé qu'après un mot de passe correct.
+- Les vues de connexion et de déconnexion imposent la protection CSRF (engagement de l'ADR-013).
+
+**Alternatives écartées.**
+- Blocage par e-mail seul : n'importe qui pourrait bloquer le compte d'un autre utilisateur.
+- Blocage par IP seule : bloquerait tous les utilisateurs d'un même réseau (lycée, CDI).
+- Connexion autorisée avec un e-mail non vérifié : la récupération de mot de passe, qui
+  repose sur l'adresse, ne serait pas fiable.
+
+**Conséquences.**
+- Un attaquant qui change d'adresse IP à chaque essai n'est pas arrêté par axes ; la
+  limitation de débit de DRF et les règles de mot de passe de la S4 compensent.
+- Les journaux d'axes doivent être purgés régulièrement (`axes_reset_logs`), avec Celery.
+- En production, axes devra lire l'adresse IP réelle derrière le reverse proxy.
+
+## ADR-019 — Durée de session et déconnexion après inactivité
+
+**Statut :** accepté.
+
+**Contexte.** La story S5 exige une déconnexion manuelle, avec une session invalidée côté
+serveur, et une déconnexion automatique après inactivité, avec un avertissement.
+
+**Décision.**
+- Côté serveur : expiration glissante de 30 minutes (`SESSION_SAVE_EVERY_REQUEST`).
+  Les sessions sont stockées dans Redis avec une copie en base (`cached_db`).
+- Côté front : un minuteur mesure l'inactivité réelle de l'utilisateur (clic, frappe,
+  défilement, toucher). Il affiche un avertissement 2 minutes avant l'échéance, avec un
+  bouton « Rester connecté », puis déconnecte. Pendant l'activité, la session serveur est
+  prolongée toutes les 5 minutes. Les onglets partagent l'heure de la dernière activité.
+- Les durées sont définies une seule fois côté serveur et transmises au front par
+  l'endpoint de session.
+- La déconnexion supprime la session côté serveur, puis vide le cache du front.
+
+**Alternatives écartées.**
+- Expiration côté serveur seule : les requêtes automatiques du front prolongeraient une
+  session alors que personne n'est devant l'écran.
+- Minuteur côté front seul : inopérant quand l'onglet est fermé ou l'ordinateur en veille.
+- Minuteur basé sur `setTimeout` : suspendu pendant la veille de l'ordinateur ; le calcul
+  repose donc sur l'heure réelle.
+
+**Conséquences.**
+- L'avertissement satisfait le critère WCAG 2.2.1 (réglage du délai).
+- La session n'a pas de durée maximale absolue : une utilisation continue n'impose jamais
+  de reconnexion.
+- Les sessions expirées restent en base jusqu'à la commande `clearsessions`, à planifier avec Celery.

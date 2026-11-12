@@ -12,6 +12,7 @@ Objectif : WCAG 2.2 niveau AA, plus des cibles de 44 px (critère 2.5.5, niveau 
 | Piège de focus, Échap, retour du focus de la modale | Testing Library | `Modal.test.tsx` |
 | Annonce des toasts, pause, erreurs persistantes | Testing Library | `ToastProvider.test.tsx` |
 | Labels, aides et erreurs des champs | Testing Library | `Input.test.tsx` |
+| Délai d'inactivité ajustable (WCAG 2.2.1) | Testing Library, faux minuteurs | `IdleSessionManager.test.tsx` |
 
 ## Vérifications manuelles
 
@@ -30,6 +31,8 @@ Objectif : WCAG 2.2 niveau AA, plus des cibles de 44 px (critère 2.5.5, niveau 
 | Formulaire d'inscription | Envoi vide, puis correction au clavier | Focus sur le premier champ en erreur, erreurs annoncées sous chaque champ |
 | Mot de passe | Bouton afficher/masquer au clavier, saisie | État du bouton annoncé, force annoncée en mots |
 | Vérification de l'e-mail | Résultat de la confirmation | Focus sur le nouveau titre, action adaptée au cas |
+| Formulaire de connexion | Envoi vide, échec, blocage, au clavier | Focus sur le champ à corriger, messages annoncés, aucun champ désigné comme faux |
+| Avertissement d'inactivité | Durées courtes en développement, NVDA | Titre et délai annoncés, Échap et « Rester connecté » prolongent la session |
 
 ### Script de vérification des cibles
 

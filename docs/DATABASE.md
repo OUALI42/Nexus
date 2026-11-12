@@ -59,6 +59,7 @@ erDiagram
         bigint user_id FK,UK
         varchar username UK
         varchar track
+        datetime onboarding_completed_at
     }
     PRIVACY_CONSENT {
         bigint id PK
@@ -248,6 +249,8 @@ La filière, présente ici en S1 sous forme de texte libre, a été déplacée d
 - `track` : liste fermée (classes préparatoires, BTS, BUT, licence, master, écoles, autre),
   définie dans `apps/accounts/tracks.py` et exposée par l'API pour le formulaire.
 - Le plan n'est pas stocké ici : il est porté par `billing_subscription` (ADR-017).
+- `onboarding_completed_at` : NULL tant que l'onboarding n'est pas terminé. Les comptes
+  sans profil (créés avant la S4) ne passent pas par l'onboarding.
 
 ### `accounts_privacyconsent`
 - Une ligne par version de la politique de confidentialité acceptée : preuve RGPD de la version et de la date.
@@ -338,3 +341,14 @@ La filière, présente ici en S1 sous forme de texte libre, a été déplacée d
 | M2M → `document` | CASCADE sur la table de liaison uniquement | La fiche ou le QCM reste, seul le lien disparaît |
 
 **Effets hors base**, déclenchés par un signal `post_delete` puis `transaction.on_commit` : suppression du fichier dans le stockage et des points Qdrant du document.
+
+
+### Sessions et journal des connexions
+
+- `django_session` : sessions, aussi conservées dans Redis (`cached_db`). Expiration
+  glissante de 30 minutes. Purge des sessions expirées par `clearsessions`.
+- Tables de django-axes (application tierce) :
+  - `axes_accessattempt` : compteur d'échecs et blocages, par couple e-mail + IP ;
+  - `axes_accessfailurelog` : une ligne par échec (e-mail saisi, IP, navigateur, date) ;
+  - `axes_accesslog` : connexions et déconnexions réussies.
+- Ces journaux contiennent des données personnelles : conservation limitée à 30 jours.

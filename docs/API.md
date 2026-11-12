@@ -210,3 +210,25 @@ version en vigueur). Le mot de passe n'est jamais renvoyé.
 **Erreurs de validation :** format unique, une entrée par champ dans `details`.
 
 **Vérification — codes d'erreur :** `token_invalid`, `token_used`, `token_expired` (400).
+
+
+### Authentification — connexion et session (S5)
+
+| Méthode | Endpoint | Permission | CSRF | Débit | Réponse |
+| --- | --- | --- | --- | --- | --- |
+| POST | `/api/v1/auth/login/` | Public | Exigé | `auth` + axes | 200, session (voir ci-dessous) |
+| POST | `/api/v1/auth/logout/` | Public | Exigé | — | 204, session supprimée côté serveur |
+| GET | `/api/v1/auth/session/` | Public | — | — | 200, toujours (connecté ou non) |
+| POST | `/api/v1/auth/onboarding/complete/` | Connecté | Exigé | — | 204 |
+
+**Session :** `{authenticated, user: {email, username, track, plan: {code, name},
+needs_onboarding} | null, idle_timeout, idle_warning}` (durées en secondes).
+
+**Codes d'erreur de la connexion :**
+
+| Code | Statut | Situation |
+| --- | --- | --- |
+| `invalid_credentials` | 401 | E-mail inconnu ou mauvais mot de passe (réponse identique) |
+| `email_not_verified` | 403 | Mot de passe correct, adresse non vérifiée |
+| `too_many_attempts` | 429 | Blocage par axes, en-tête `Retry-After` |
+| `not_authenticated` | 403 | Session absente ou expirée, sur un endpoint qui l'exige |
