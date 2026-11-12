@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     "apps.assistant",
     "apps.notifications",
     "apps.progress",
+    "axes",
 ]
 
 AUTH_USER_MODEL = "accounts.User"
@@ -112,6 +113,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -202,7 +204,16 @@ MEDIA_ROOT = BASE_DIR / "media"
 # --- Session & CSRF ---
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = "Lax"
-SESSION_COOKIE_AGE = 60 * 60 * 24 * 14  # 2 weeks
+
+# --- Inactivity timeout (single source of truth, also sent to the front-end) ---
+SESSION_IDLE_TIMEOUT = 30 * 60  # seconds without activity before logout
+SESSION_IDLE_WARNING = 2 * 60  # seconds of warning before that logout
+# SESSION_IDLE_TIMEOUT = 60  # TEMPORARY: 1 minute for testing
+# SESSION_IDLE_WARNING = 30
+
+SESSION_COOKIE_AGE = SESSION_IDLE_TIMEOUT
+SESSION_SAVE_EVERY_REQUEST = True  # each request pushes the expiry back
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
 
 CSRF_COOKIE_HTTPONLY = False  # the SPA must read it to send X-CSRFToken
 CSRF_COOKIE_SAMESITE = "Lax"
@@ -221,3 +232,28 @@ PRIVACY_POLICY_VERSION = "2026-11"
 # --- Email verification ---
 FRONTEND_URL = env("FRONTEND_URL", default="http://localhost:5173")
 EMAIL_VERIFICATION_TOKEN_TTL = timedelta(hours=24)
+
+
+# --- Login attempts (django-axes) ---
+AUTHENTICATION_BACKENDS = [
+    # Must come first: refuses authentication while locked out.
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = timedelta(minutes=15)
+# Lock the (email, IP) pair: an attacker cannot lock someone else's account.
+AXES_LOCKOUT_PARAMETERS = [["username", "ip_address"]]
+AXES_RESET_ON_SUCCESS = True
+AXES_USERNAME_FORM_FIELD = "email"
+AXES_ENABLE_ACCESS_FAILURE_LOG = True  # one row per failed attempt
+AXES_LOCKOUT_CALLABLE = "apps.accounts.lockout.lockout_response"
+
+# --- Cache (Redis): sessions, throttling counters ---
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": env("REDIS_URL", default="redis://redis:6379/0"),
+    }
+}

@@ -1,5 +1,6 @@
 import { NavLink } from "react-router";
-
+import { LogoutButton } from "@/features/auth/components/LogoutButton";
+import { useSession } from "@/features/auth/hooks";
 import { NAV_ITEMS, SETTINGS_PATH, type NavItem } from "@/app/navigation";
 import { cx } from "@/shared/lib/cx";
 import { ThemeSwitcher } from "@/shared/theme/ThemeSwitcher";
@@ -8,6 +9,8 @@ import { Logo } from "@/shared/ui/Logo";
 export function Sidebar() {
   const mainItems = NAV_ITEMS.filter((item) => item.to !== SETTINGS_PATH);
   const settings = NAV_ITEMS.find((item) => item.to === SETTINGS_PATH);
+  const { data: session } = useSession();
+  const displayName = session?.user?.username ?? session?.user?.email;
 
   return (
     <aside className="sticky top-4 m-4 hidden h-[calc(100dvh-2rem)] w-sidebar shrink-0 flex-col gap-4 overflow-y-auto rounded-nav bg-linear-to-b from-nav-from via-nav-via to-nav-to p-4 text-nav-text md:flex">
@@ -29,7 +32,15 @@ export function Sidebar() {
         )}
       </nav>
 
-      <ThemeSwitcher />
+      <div className="flex flex-col gap-2 border-t border-nav-text/20 pt-4">
+        {displayName && (
+          <p className="px-3.5 text-sm">
+            Connecté en tant que <strong>{displayName}</strong>
+          </p>
+        )}
+        <LogoutButton className="text-nav-text hover:bg-nav-active focus-visible:outline-nav-focus" />
+        <ThemeSwitcher />
+      </div>
     </aside>
   );
 }

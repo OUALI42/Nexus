@@ -1,13 +1,17 @@
 from urllib.parse import urlencode
 
 from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
 from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
+from django.http import HttpRequest
 from django.template.loader import render_to_string
 from django.utils.timezone import now
 
 from .exceptions import (
+    EmailNotVerified,
     ExpiredVerificationToken,
+    InvalidCredentials,
     InvalidVerificationToken,
     UsedVerificationToken,
 )
@@ -103,3 +107,34 @@ def resend_email_verification(email: str) -> None:
         return
     with transaction.atomic():
         start_email_verification(user)
+
+
+def log_in(request: HttpRequest, *, email: str, password: str) -> User:
+    """
+    Checks the credentials (axes counts failures), then opens the session.
+    `request` must be Django's HttpRequest: axes flags lockouts on it.
+    """
+    user = authenticate(request=request, email=email.strip().lower(), password=password)
+    if user is None:
+        # Unknown email, wrong password, inactive account or lockout:
+        # same answer. On lockout, AxesMiddleware replaces it with a 429.
+        raise InvalidCredentials()
+
+    # Option A: no access before the email is verified.
+    # (Option B: remove these two lines and show a reminder banner instead.)
+    if not user.is_email_verified:
+        raise EmailNotVerified()
+
+    login(request, user)  # new session key, new CSRF token, axes counter reset
+    return user
+
+
+def log_out(request: HttpRequest) -> None:
+    """Deletes the session server-side: the cookie becomes useless."""
+    logout(request)
+
+
+def complete_onboarding(user: User) -> None:
+    Profile.objects.filter(user=user, onboarding_completed_at__isnull=True).update(
+        onboarding_completed_at=now()
+    )

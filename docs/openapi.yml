@@ -17,6 +17,65 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: |-
+        DRF only enforces CSRF for authenticated users. Views reachable while
+        logged out (register, login) must enforce it explicitly, otherwise an
+        attacker's site could submit them in the victim's browser (login CSRF).
+      summary: Log in (session cookie)
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
+  /api/v1/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: |-
+        DRF only enforces CSRF for authenticated users. Views reachable while
+        logged out (register, login) must enforce it explicitly, otherwise an
+        attacker's site could submit them in the victim's browser (login CSRF).
+      summary: Log out
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/onboarding/complete/:
+    post:
+      operationId: auth_onboarding_complete_create
+      summary: Finish onboarding
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/auth/privacy-policy/:
     get:
       operationId: auth_privacy_policy_retrieve
@@ -93,6 +152,22 @@ paths:
       responses:
         '202':
           description: No response body
+  /api/v1/auth/session/:
+    get:
+      operationId: auth_session_retrieve
+      summary: Current session
+      tags:
+      - auth
+      security:
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: ''
   /api/v1/auth/tracks/:
     get:
       operationId: auth_tracks_list
@@ -166,6 +241,30 @@ components:
       required:
       - database
       - status
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+    PlanSummary:
+      type: object
+      properties:
+        code:
+          type: string
+        name:
+          type: string
+      required:
+      - code
+      - name
     PrivacyPolicy:
       type: object
       properties:
@@ -233,6 +332,48 @@ components:
           minLength: 1
       required:
       - email
+    Session:
+      type: object
+      properties:
+        authenticated:
+          type: boolean
+        user:
+          allOf:
+          - $ref: '#/components/schemas/SessionUser'
+          nullable: true
+        idle_timeout:
+          type: integer
+        idle_warning:
+          type: integer
+      required:
+      - authenticated
+      - idle_timeout
+      - idle_warning
+      - user
+    SessionUser:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+          nullable: true
+        track:
+          type: string
+          nullable: true
+        plan:
+          allOf:
+          - $ref: '#/components/schemas/PlanSummary'
+          nullable: true
+        needs_onboarding:
+          type: boolean
+      required:
+      - email
+      - needs_onboarding
+      - plan
+      - track
+      - username
     TrackEnum:
       enum:
       - mpsi
