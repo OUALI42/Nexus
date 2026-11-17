@@ -12,6 +12,7 @@ urlpatterns = [
         name="swagger-ui",
     ),
     path("api/lockers/", include("apps.subjects.urls")),
+    path("api/courses/", include("apps.documents.urls")),
 ]
 
 handler404 = "apps.core.views.not_found"

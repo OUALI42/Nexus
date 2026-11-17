@@ -4,54 +4,16 @@ import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 
-from apps.core.demo.pdf import build_pdf
 from apps.documents.models import Document
 from apps.subjects.models import Subject
 
+from .helpers import pdf_file, upload
+
 pytestmark = pytest.mark.django_db
-
-# Django accepts an unmasked 32-char secret both in the cookie and the header.
-CSRF_SECRET = "a" * 32
-
-
-@pytest.fixture(autouse=True)
-def _media_in_tmp(settings, tmp_path):
-    settings.MEDIA_ROOT = tmp_path
-
-
-@pytest.fixture
-def other_user(django_user_model):
-    return django_user_model.objects.create_user(
-        email="grace@example.com", password="Str0ng-password!"
-    )
-
-
-@pytest.fixture
-def logged_client(api_client, verified_user):
-    api_client.force_login(verified_user)
-    api_client.cookies["csrftoken"] = CSRF_SECRET
-    return api_client
-
-
-@pytest.fixture
-def locker(verified_user):
-    return Subject.objects.create(owner=verified_user, name="Maths", color="#4338ca")
 
 
 def courses_url(locker):
     return reverse("lockers:courses", args=[locker.pk])
-
-
-def pdf_file(name="Suites numériques.pdf"):
-    return SimpleUploadedFile(
-        name, build_pdf("Suites", ["Une suite..."]), "application/pdf"
-    )
-
-
-def upload(client, url, file, **extra):
-    return client.post(
-        url, {"file": file}, format="multipart", HTTP_X_CSRFTOKEN=CSRF_SECRET, **extra
-    )
 
 
 def test_a_student_uploads_a_pdf_to_their_locker(logged_client, locker):
