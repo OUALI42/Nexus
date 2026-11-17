@@ -8,3 +8,4 @@ EMAIL_HOST = env("EMAIL_HOST", default="mailpit")
 EMAIL_PORT = env.int("EMAIL_PORT", default=1025)
 EMAIL_USE_TLS = False
 DEFAULT_FROM_EMAIL = "Nexus <no-reply@nexus.local>"
+ALLOW_DEMO_SEED = True
