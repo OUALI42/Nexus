@@ -99,8 +99,10 @@ apps/<domain>/
 - Les vues restent fines : la logique métier va dans `services.py`. Elle devient ainsi testable sans passer par HTTP.
 - Une app ne lit pas directement les modèles d'une autre app pour y écrire : elle passe par le service de cette app. Exemple : `revision` appelle `ai.services.create_job()`.
 - `apps/ai` est le seul module qui parle au fournisseur IA.
+- `apps/core/demo/` : données de démo (`data.py`), générateur de PDF minimal (`pdf.py`)
+  et création idempotente (`seed.py`), utilisés par la commande `seed_demo` (ADR-020).
 
-### Front-end : organisation 
+### Front-end : organisation
 
     frontend/src/
     ├── app/
@@ -138,3 +140,7 @@ features/<feature>/
 - **TanStack Query** pour l'état serveur (cache, invalidation, polling des `AIJob`) : pas de Redux nécessaire.
 - **React Router** pour le routage.
 - Types API générés à partir du schéma OpenAPI (`openapi-typescript`) : le front et le back partagent le même contrat.
+- `features/auth/config.ts` : page d'arrivée après connexion (`HOME_AFTER_LOGIN`) et
+  interrupteur de l'onboarding (`ONBOARDING_ENABLED`).
+- `app/query-client.ts` : `createQueryClient()`, utilisé à la fois par l'application et par
+  les tests, pour que les tests vérifient la configuration réelle du cache.

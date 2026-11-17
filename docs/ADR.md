@@ -419,3 +419,34 @@ serveur, et une déconnexion automatique après inactivité, avec un avertisseme
 - La session n'a pas de durée maximale absolue : une utilisation continue n'impose jamais
   de reconnexion.
 - Les sessions expirées restent en base jusqu'à la commande `clearsessions`, à planifier avec Celery.
+
+## ADR-020 — Données de démo réservées au développement
+
+**Statut :** accepté.
+
+**Contexte.** La story S6 demande des comptes et des données de démo, pour présenter
+l'application sans passer par l'inscription, sans jamais exposer de mot de passe dans le dépôt.
+
+**Décision.**
+- Une commande `manage.py seed_demo` crée 3 élèves (adresses en `.test`, domaine réservé),
+  leurs casiers et des cours au format PDF générés par la commande.
+- Elle est relançable : chaque élément est recherché avant d'être créé. L'option `--reset`
+  supprime d'abord les comptes de démo.
+- Elle refuse de s'exécuter si `ALLOW_DEMO_SEED` (défini uniquement dans `dev.py`) et
+  `DEBUG` ne sont pas tous deux actifs.
+- Le mot de passe est lu dans `DEMO_ACCOUNT_PASSWORD` (fichier `.env`), validé par les mêmes
+  règles qu'un vrai compte, et jamais affiché.
+- Après la connexion, l'utilisateur arrive sur « Mes casiers ». L'onboarding (S5) est
+  désactivé par un interrupteur (`ONBOARDING_ENABLED`), et non supprimé ; ses tests le
+  réactivent pour qu'il reste vérifié.
+
+**Alternatives écartées.**
+- Fixtures Django (`loaddata`) : mots de passe hachés figés dans le dépôt, fichiers PDF à
+  versionner, et aucune protection contre une exécution en production.
+- Test sur `DEBUG` seul : une seule erreur de configuration suffirait à créer des comptes
+  au mot de passe connu en production.
+- Mot de passe par défaut dans le code : connu de quiconque lit le dépôt.
+
+**Conséquences.**
+- Les cours de démo passent la vérification de signature PDF prévue en S7.
+- La S7 devra compléter les données de démo avec les icônes des casiers.
