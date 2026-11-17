@@ -51,3 +51,41 @@ export function fetchLockerChoices(
 export function createLocker(payload: CreateLockerPayload): Promise<Locker> {
   return api.post("/lockers/", payload, lockerSchema);
 }
+
+const courseSchema = z
+  .object({
+    id: z.number(),
+    title: z.string(),
+    size_bytes: z.number(),
+    // A plain string: a new back-end status must not break the whole list.
+    analysis_status: z.string(),
+    created_at: z.string(),
+    file_url: z.string(),
+  })
+  .transform((course) => ({
+    id: course.id,
+    title: course.title,
+    sizeBytes: course.size_bytes,
+    analysisStatus: course.analysis_status,
+    createdAt: course.created_at,
+    fileUrl: course.file_url,
+  }));
+
+export type Course = z.output<typeof courseSchema>;
+
+export function fetchCourses(
+  lockerId: number,
+  signal?: AbortSignal,
+): Promise<Course[]> {
+  return api.get(
+    `/lockers/${lockerId}/courses/`,
+    z.array(courseSchema),
+    signal,
+  );
+}
+
+export function uploadCourse(lockerId: number, file: File): Promise<Course> {
+  const body = new FormData();
+  body.append("file", file);
+  return api.post(`/lockers/${lockerId}/courses/`, body, courseSchema);
+}

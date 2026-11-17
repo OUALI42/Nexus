@@ -77,7 +77,13 @@ const sessionSchema = z
         email: z.string(),
         username: z.string().nullable(),
         track: z.string().nullable(),
-        plan: z.object({ code: z.string(), name: z.string() }).nullable(),
+        plan: z
+          .object({
+            code: z.string(),
+            name: z.string(),
+            max_file_size_bytes: z.number(),
+          })
+          .nullable(),
         needs_onboarding: z.boolean(),
       })
       .nullable(),
@@ -90,7 +96,11 @@ const sessionSchema = z
       email: session.user.email,
       username: session.user.username,
       track: session.user.track,
-      plan: session.user.plan,
+      plan: session.user.plan && {
+        code: session.user.plan.code,
+        name: session.user.plan.name,
+        maxFileSizeBytes: session.user.plan.max_file_size_bytes,
+      },
       needsOnboarding: session.user.needs_onboarding,
     },
     idleTimeout: session.idle_timeout,

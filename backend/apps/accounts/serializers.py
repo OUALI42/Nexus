@@ -114,6 +114,7 @@ class LoginSerializer(serializers.Serializer):
 class PlanSummarySerializer(serializers.Serializer):
     code = serializers.CharField()
     name = serializers.CharField()
+    max_file_size_bytes = serializers.IntegerField()
 
 
 class SessionUserSerializer(serializers.Serializer):

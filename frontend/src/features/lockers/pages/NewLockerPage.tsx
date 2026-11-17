@@ -3,7 +3,7 @@ import { useId, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import { z } from "zod";
 
-import { isApiError } from "@/shared/api";
+import { isApiError, getFieldErrors } from "@/shared/api";
 import { cx } from "@/shared/lib/cx";
 import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
@@ -23,14 +23,6 @@ const lockerSchema = z.object({
 type LockerValues = z.input<typeof lockerSchema>;
 type Field = keyof LockerValues;
 type FieldErrors = Partial<Record<Field, string>>;
-
-function apiFieldError(error: unknown, field: Field): string | undefined {
-  if (!isApiError(error)) return undefined;
-  const messages = error.details?.[field];
-  return Array.isArray(messages) && typeof messages[0] === "string"
-    ? messages[0]
-    : undefined;
-}
 
 export function NewLockerPage() {
   const choices = useLockerChoices();
@@ -98,10 +90,11 @@ function NewLockerForm({ choices }: { choices: LockerChoices }) {
         void navigate("/casiers");
       },
       onError: (error) => {
+        const fields = getFieldErrors(error);
         const next: FieldErrors = {
-          name: apiFieldError(error, "name"),
-          color: apiFieldError(error, "color"),
-          icon: apiFieldError(error, "icon"),
+          name: fields.name,
+          color: fields.color,
+          icon: fields.icon,
         };
         if (next.name || next.color || next.icon) {
           setErrors(next);

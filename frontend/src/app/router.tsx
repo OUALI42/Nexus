@@ -19,6 +19,7 @@ import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { OnboardingPage } from "@/features/auth/pages/OnboardingPage";
 import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
 import { LockersPage } from "@/features/lockers/pages/LockersPage";
+import { LockerPage } from "@/features/lockers/pages/LockerPage";
 import { NewLockerPage } from "@/features/lockers/pages/NewLockerPage";
 
 // Every navigation entry except the dashboard gets a placeholder page for now.
@@ -78,6 +79,7 @@ export const routes: RouteObject[] = [
               { index: true, Component: HomePage },
               { path: "casiers", Component: LockersPage },
               { path: "casiers/nouveau", Component: NewLockerPage },
+              { path: "/casiers/:lockerId", element: <LockerPage /> },
               ...placeholderRoutes,
               ...(import.meta.env.DEV
                 ? [{ path: "design", Component: DesignSystemPage }]

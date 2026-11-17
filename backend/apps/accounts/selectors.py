@@ -23,7 +23,11 @@ def session_payload(user) -> dict:
         "username": profile.username if profile else None,
         "track": profile.track if profile else None,
         "plan": (
-            {"code": subscription.plan.code, "name": subscription.plan.name}
+            {
+                "code": subscription.plan.code,
+                "name": subscription.plan.name,
+                "max_file_size_bytes": subscription.plan.max_file_size_bytes,
+            }
             if subscription
             else None
         ),

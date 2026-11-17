@@ -30,3 +30,12 @@ export const LOCKER_CHOICES = {
     { value: "atom", label: "Atome" },
   ],
 };
+
+export const SUITES_COURSE = {
+  id: 7,
+  title: "Suites numériques",
+  size_bytes: 1_258_291,
+  analysis_status: "pending",
+  created_at: "2026-11-17T10:00:00Z",
+  file_url: "/api/v1/courses/7/file/",
+};

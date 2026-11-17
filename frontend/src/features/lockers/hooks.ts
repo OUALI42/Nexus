@@ -5,6 +5,8 @@ import {
   fetchLocker,
   fetchLockerChoices,
   fetchLockers,
+  fetchCourses,
+  uploadCourse,
 } from "./api";
 
 export const lockerKeys = {
@@ -12,6 +14,8 @@ export const lockerKeys = {
   list: () => [...lockerKeys.all, "list"] as const,
   detail: (id: number) => [...lockerKeys.all, "detail", id] as const,
   choices: () => [...lockerKeys.all, "choices"] as const,
+  courses: (lockerId: number) =>
+    [...lockerKeys.all, "courses", lockerId] as const,
 };
 
 export function useLockers() {
@@ -41,6 +45,23 @@ export function useCreateLocker() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createLocker,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: lockerKeys.all }),
+  });
+}
+
+export function useCourses(lockerId: number) {
+  return useQuery({
+    queryKey: lockerKeys.courses(lockerId),
+    queryFn: ({ signal }) => fetchCourses(lockerId, signal),
+  });
+}
+
+export function useUploadCourse(lockerId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (file: File) => uploadCourse(lockerId, file),
+    // Refreshes the course list and every course count.
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: lockerKeys.all }),
   });
