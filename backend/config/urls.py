@@ -11,6 +11,7 @@ urlpatterns = [
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
+    path("api/lockers/", include("apps.subjects.urls")),
 ]
 
 handler404 = "apps.core.views.not_found"
