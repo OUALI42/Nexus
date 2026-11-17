@@ -16,8 +16,10 @@ export function urlOf(input: RequestInfo | URL): string {
  * Stubs fetch: answers by URL suffix. The CSRF endpoint is always handled.
  * Each route is a factory, so a response body can be read on every call.
  */
-export function mockFetch(routes: Record<string, () => Response>) {
-  const fetchMock = vi.fn<typeof fetch>((input) => {
+export function mockFetch(
+  routes: Record<string, (init?: RequestInit) => Response>,
+) {
+  const fetchMock = vi.fn<typeof fetch>((input, init) => {
     const url = urlOf(input);
     if (url.endsWith("/auth/csrf/")) {
       document.cookie = "csrftoken=test-token; path=/";
@@ -27,7 +29,7 @@ export function mockFetch(routes: Record<string, () => Response>) {
       url.endsWith(suffix),
     );
     return route
-      ? Promise.resolve(route[1]())
+      ? Promise.resolve(route[1](init))
       : Promise.reject(new Error(`Unexpected request: ${url}`));
   });
   vi.stubGlobal("fetch", fetchMock);

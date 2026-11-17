@@ -15,7 +15,11 @@ export function authenticatedSession(
       email: "ada@example.com",
       username: "ada",
       track: "mpsi",
-      plan: { code: "basic", name: "Basique" },
+      plan: {
+        code: "basic",
+        name: "Basique",
+        max_file_size_bytes: 10 * 1024 * 1024,
+      },
       needs_onboarding: false,
       ...overrides,
     },

@@ -352,3 +352,56 @@ La filière, présente ici en S1 sous forme de texte libre, a été déplacée d
   - `axes_accessfailurelog` : une ligne par échec (e-mail saisi, IP, navigateur, date) ;
   - `axes_accesslog` : connexions et déconnexions réussies.
 - Ces journaux contiennent des données personnelles : conservation limitée à 30 jours.
+
+
+## Évolutions S7 — Casiers et cours
+
+### `subjects_subject`
+
+| Colonne | Type | Contraintes |
+| --- | --- | --- |
+| `icon` | `varchar(20)` | `NOT NULL`, défaut `'folder'`, `CHECK subjects_subject_icon_valid` |
+
+La contrainte `subjects_subject_icon_valid` limite `icon` aux 16 valeurs de `LockerIcon` (`apps/subjects/icons.py`) : `folder`, `book-open`, `calculator`, `sigma`, `atom`, `flask-conical`, `leaf`, `globe`, `landmark`, `languages`, `pen-line`, `trending-up`, `scale`, `code`, `palette`, `music`.
+
+Elle est vérifiée par MySQL lui-même : une écriture qui contourne la validation Django (ORM direct, script) est refusée aussi.
+
+La colonne `color` n'a **pas** de contrainte en base. La palette de 12 couleurs est vérifiée par l'API (ADR-021) :
+
+| Valeur | Libellé |
+| --- | --- |
+| `#4338ca` | Indigo |
+| `#1d4ed8` | Bleu |
+| `#0e7490` | Cyan |
+| `#0f766e` | Sarcelle |
+| `#166534` | Vert |
+| `#b45309` | Ambre |
+| `#c2410c` | Orange |
+| `#b91c1c` | Rouge |
+| `#9d174d` | Framboise |
+| `#be185d` | Rose |
+| `#6d28d9` | Violet |
+| `#475569` | Ardoise |
+
+L'unicité `(owner, name)` existante s'appuie sur la collation `utf8mb4_0900_ai_ci` : « Maths », « maths » et « MATHS » sont considérés comme identiques.
+
+### `documents_document` : remplissage à l'envoi d'un cours
+
+| Colonne | Valeur |
+| --- | --- |
+| `file` | Nom aléatoire (UUID) généré par `upload_to` |
+| `title` | Nom d'origine sans extension, 255 caractères maximum |
+| `original_filename` | Nom d'origine, sans chemin |
+| `mime_type` | `application/pdf`, établi par la signature du fichier et non par le navigateur |
+| `size_bytes` | Taille réelle du fichier |
+| `sha256` | Empreinte calculée par morceaux |
+| `kind` | `course` |
+| `status` | Valeur par défaut (`pending`) : l'analyse par l'IA n'est pas encore branchée |
+
+Si l'insertion en base échoue après l'écriture du fichier, le fichier est supprimé du disque : aucun fichier orphelin ne peut échapper à l'export ou à la suppression RGPD.
+
+### Nombre de cours d'un casier
+
+Calculé dans la même requête que la liste des casiers (pas de requête par casier) :
+
+`Count("documents", filter=Q(documents__kind="course"))`

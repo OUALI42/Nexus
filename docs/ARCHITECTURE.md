@@ -144,3 +144,48 @@ features/<feature>/
   interrupteur de l'onboarding (`ONBOARDING_ENABLED`).
 - `app/query-client.ts` : `createQueryClient()`, utilisé à la fois par l'application et par
   les tests, pour que les tests vérifient la configuration réelle du cache.
+
+
+## Casiers et cours (S7)
+
+### Back
+
+| Application | Fichiers | Rôle |
+| --- | --- | --- |
+| `subjects` | `icons.py`, `colors.py` | Listes fermées des icônes et des couleurs |
+| `subjects` | `selectors.py` | `lockers_for(user)`, `get_locker(user, pk)` : toute lecture part du propriétaire |
+| `subjects` | `services.py` | `create_locker` : position en fin de liste, unicité garantie par la base |
+| `documents` | `validators.py` | Signature PDF, empreinte SHA-256, format des tailles |
+| `documents` | `services.py` | `upload_course` : création du cours, nettoyage du fichier en cas d'échec |
+| `documents` | `selectors.py` | `courses_in(locker)`, `get_course(user, pk)` |
+| `billing` | `selectors.py` | `max_upload_size_for(user)` : limite de l'offre |
+
+Les routes sont branchées dans `config/api_urls.py`, sous `/api/v1/` :
+
+- `lockers/` → `apps.subjects.urls` (espace de noms `lockers`)
+- `courses/` → `apps.documents.urls` (espace de noms `courses`)
+
+Les tests utilisent `reverse()` avec ces espaces de noms. Ils ne dépendent donc pas du préfixe, ce qui impose une vérification manuelle ou un test de bout en bout pour valider le branchement réel.
+
+### Front
+
+| Dossier `features/lockers/` | Rôle |
+| --- | --- |
+| `api.ts` | Schémas zod (snake_case → camelCase), appels à l'API |
+| `hooks.ts` | `useLockers`, `useLocker`, `useLockerChoices`, `useCreateLocker`, `useCourses`, `useUploadCourse` |
+| `icons.tsx` | Correspondance entre noms d'icônes et composants lucide, avec repli sur le dossier |
+| `format.ts` | Nombre de cours, taille, date, état d'analyse en toutes lettres |
+| `components/` | `LockerBadge`, `LockerCard`, `ChoiceRadioGroup`, `CourseUploader`, `CourseList` |
+| `pages/` | `LockersPage`, `NewLockerPage`, `LockerPage` |
+
+Routes (protégées par `RequireAuth`, sous `RootLayout`) :
+
+| Route | Page |
+| --- | --- |
+| `/casiers` | Liste des casiers |
+| `/casiers/nouveau` | Création d'un casier |
+| `/casiers/:lockerId` | Page d'un casier |
+
+Les clés de cache commencent toutes par `["lockers"]`. Une création ou un dépôt invalide tout ce préfixe, ce qui met à jour la liste, les compteurs et les cours. La déconnexion vide tout le cache (`queryClient.clear()`), donc un élève ne voit jamais les casiers du précédent sur le même ordinateur.
+
+Le client d'API (`shared/api/client.ts`) envoie un `FormData` tel quel : le navigateur écrit lui-même l'en-tête `multipart` et sa frontière.

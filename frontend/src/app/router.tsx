@@ -18,14 +18,21 @@ import { RedirectIfAuthenticated } from "@/features/auth/components/RedirectIfAu
 import { RequireAuth } from "@/features/auth/components/RequireAuth";
 import { OnboardingPage } from "@/features/auth/pages/OnboardingPage";
 import { ForgotPasswordPage } from "@/features/auth/pages/ForgotPasswordPage";
+import { LockersPage } from "@/features/lockers/pages/LockersPage";
+import { LockerPage } from "@/features/lockers/pages/LockerPage";
+import { NewLockerPage } from "@/features/lockers/pages/NewLockerPage";
 
 // Every navigation entry except the dashboard gets a placeholder page for now.
-const placeholderRoutes = NAV_ITEMS.filter((item) => item.to !== "/").map(
-  (item) => ({
-    path: item.to.slice(1),
-    element: <ComingSoonPage title={item.label} />,
-  }),
-);
+// Navigation entries that already have a real page.
+const IMPLEMENTED_PATHS = new Set(["/", "/casiers"]);
+
+// Every other navigation entry gets a placeholder page for now.
+const placeholderRoutes = NAV_ITEMS.filter(
+  (item) => !IMPLEMENTED_PATHS.has(item.to),
+).map((item) => ({
+  path: item.to.slice(1),
+  element: <ComingSoonPage title={item.label} />,
+}));
 
 export const routes: RouteObject[] = [
   {
@@ -70,6 +77,9 @@ export const routes: RouteObject[] = [
             Component: RootLayout,
             children: [
               { index: true, Component: HomePage },
+              { path: "casiers", Component: LockersPage },
+              { path: "casiers/nouveau", Component: NewLockerPage },
+              { path: "/casiers/:lockerId", element: <LockerPage /> },
               ...placeholderRoutes,
               ...(import.meta.env.DEV
                 ? [{ path: "design", Component: DesignSystemPage }]

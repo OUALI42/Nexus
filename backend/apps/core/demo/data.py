@@ -13,6 +13,7 @@ class DemoCourse:
 class DemoLocker:
     name: str
     color: str
+    icon: str = "folder"
     courses: list[DemoCourse] = field(default_factory=list)
 
 
@@ -37,6 +38,7 @@ DEMO_STUDENTS = [
             DemoLocker(
                 name="Mathématiques",
                 color="#4338ca",
+                icon="sigma",
                 courses=[
                     DemoCourse(
                         title="Suites numériques",
@@ -67,6 +69,7 @@ DEMO_STUDENTS = [
             DemoLocker(
                 name="Physique-Chimie",
                 color="#0e7490",
+                icon="atom",
                 courses=[
                     DemoCourse(
                         title="Mécanique du point",
@@ -83,6 +86,7 @@ DEMO_STUDENTS = [
             DemoLocker(
                 name="Informatique",
                 color="#6d28d9",
+                icon="code",
                 courses=[
                     DemoCourse(
                         title="Algorithmes de tri",
@@ -109,6 +113,7 @@ DEMO_STUDENTS = [
             DemoLocker(
                 name="Biologie",
                 color="#166534",
+                icon="leaf",
                 courses=[
                     DemoCourse(
                         title="La cellule eucaryote",
@@ -125,6 +130,7 @@ DEMO_STUDENTS = [
             DemoLocker(
                 name="Chimie",
                 color="#b45309",
+                icon="flask-conical",
                 courses=[
                     DemoCourse(
                         title="Cinétique chimique",
@@ -149,6 +155,7 @@ DEMO_STUDENTS = [
             DemoLocker(
                 name="Économie",
                 color="#9d174d",
+                icon="trending-up",
                 courses=[
                     DemoCourse(
                         title="Le marché et la formation des prix",
@@ -164,6 +171,7 @@ DEMO_STUDENTS = [
             DemoLocker(
                 name="Mathématiques appliquées",
                 color="#1d4ed8",
+                icon="calculator",
                 courses=[
                     DemoCourse(
                         title="Probabilités discrètes",
@@ -176,7 +184,7 @@ DEMO_STUDENTS = [
                     ),
                 ],
             ),
-            DemoLocker(name="Histoire-géographie", color="#475569"),
+            DemoLocker(name="Histoire-géographie", color="#475569", icon="globe"),
         ],
     ),
 ]

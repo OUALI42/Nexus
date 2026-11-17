@@ -4,6 +4,8 @@ from django.db import models
 
 from apps.core.models import TimeStampedModel
 
+from .icons import LockerIcon
+
 hex_color_validator = RegexValidator(r"^#[0-9A-Fa-f]{6}$", "Format attendu : #RRGGBB.")
 
 
@@ -15,6 +17,11 @@ class Subject(TimeStampedModel):
     color = models.CharField(
         max_length=7, default="#6366F1", validators=[hex_color_validator]
     )
+    icon = models.CharField(
+        max_length=20,
+        choices=LockerIcon.choices,
+        default=LockerIcon.FOLDER,
+    )
     position = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
@@ -23,6 +30,10 @@ class Subject(TimeStampedModel):
         constraints = [
             models.UniqueConstraint(
                 fields=["owner", "name"], name="uniq_subject_owner_name"
+            ),
+            models.CheckConstraint(
+                condition=models.Q(icon__in=LockerIcon.values),
+                name="subjects_subject_icon_valid",
             ),
         ]
         indexes = [
