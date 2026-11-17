@@ -263,3 +263,6 @@ CACHES = {
 # Only dev.py enables it: the command refuses to run anywhere else.
 ALLOW_DEMO_SEED = False
 DEMO_ACCOUNT_PASSWORD = env("DEMO_ACCOUNT_PASSWORD", default="")
+
+# Fallback upload limit for accounts without a subscription (e.g. the S1 admin).
+DEFAULT_MAX_UPLOAD_SIZE = 10 * 1024 * 1024

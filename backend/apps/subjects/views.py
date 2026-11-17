@@ -48,7 +48,11 @@ class LockerChoicesView(APIView):
     @extend_schema(responses=LockerChoicesSerializer)
     def get(self, request):
         data = {
-            "colors": [{"value": v, "label": l} for v, l in LockerColor.choices],
-            "icons": [{"value": v, "label": l} for v, l in LockerIcon.choices],
+            "colors": [
+                {"value": value, "label": label} for value, label in LockerColor.choices
+            ],
+            "icons": [
+                {"value": value, "label": label} for value, label in LockerIcon.choices
+            ],
         }
         return Response(LockerChoicesSerializer(data).data)
