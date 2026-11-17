@@ -19,11 +19,11 @@ The React Compiler is not enabled on this template because of its impact on dev 
    `docker compose up -d --force-recreate backend`
 3. Créez les données : `docker compose exec backend python manage.py seed_demo`
 
-| Compte | Filière | Offre |
-| --- | --- | --- |
-| `demo.ines@nexus.test` | MPSI | Premium |
-| `demo.lucas@nexus.test` | BCPST | Basique |
-| `demo.emma@nexus.test` | ECG | Intermédiaire |
+| Compte                  | Filière | Offre         |
+| ----------------------- | ------- | ------------- |
+| `demo.ines@nexus.test`  | MPSI    | Premium       |
+| `demo.lucas@nexus.test` | BCPST   | Basique       |
+| `demo.emma@nexus.test`  | ECG     | Intermédiaire |
 
 Mot de passe : la valeur de `DEMO_ACCOUNT_PASSWORD`.
 
