@@ -3,6 +3,7 @@ import { Button } from "@/shared/ui/Button";
 import { FullPageStatus } from "@/shared/ui/FullPageStatus";
 import { useSession } from "../hooks";
 import { IdleSessionManager } from "./IdleSessionManager";
+import { HOME_AFTER_LOGIN, ONBOARDING_ENABLED } from "../config";
 
 export const ONBOARDING_PATH = "/bienvenue";
 
@@ -46,11 +47,12 @@ export function RequireAuth() {
   }
 
   const isOnboardingPage = location.pathname === ONBOARDING_PATH;
-  if (user.needsOnboarding && !isOnboardingPage) {
+  const needsOnboarding = ONBOARDING_ENABLED && user.needsOnboarding;
+  if (needsOnboarding && !isOnboardingPage) {
     return <Navigate to={ONBOARDING_PATH} replace />;
   }
-  if (!user.needsOnboarding && isOnboardingPage) {
-    return <Navigate to="/" replace />;
+  if (!needsOnboarding && isOnboardingPage) {
+    return <Navigate to={HOME_AFTER_LOGIN} replace />;
   }
 
   return (

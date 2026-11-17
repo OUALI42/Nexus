@@ -1,16 +1,14 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { render } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
-
+import { createQueryClient } from "@/app/query-client";
 import { routes } from "@/app/router";
 import { ThemeProvider } from "@/shared/theme/ThemeProvider";
 import { ToastProvider } from "@/shared/ui/toast/ToastProvider";
 
 function AppTestProviders({ children }: { children: ReactNode }) {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  });
+  const queryClient = createQueryClient({ retry: false });
   return (
     <ThemeProvider>
       <ToastProvider>

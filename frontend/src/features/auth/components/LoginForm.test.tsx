@@ -79,7 +79,7 @@ describe("Login form", () => {
     ).toBe(false);
   });
 
-  it("opens the dashboard after logging in", async () => {
+  it("opens Mes casiers after logging in", async () => {
     const user = userEvent.setup();
     const fetchMock = mockLogin(() => jsonResponse(authenticatedSession()));
     renderApp("/connexion");
@@ -87,7 +87,7 @@ describe("Login form", () => {
     await fillAndSubmit(user);
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Tableau de bord" }),
+      await screen.findByRole("heading", { level: 1, name: "Mes casiers" }),
     ).toBeInTheDocument();
     expect(requestBody(fetchMock, "/auth/login/")).toEqual({
       email: "ada@example.com",
@@ -95,7 +95,7 @@ describe("Login form", () => {
     });
   });
 
-  it("opens the onboarding on the first login", async () => {
+  it("opens Mes casiers even on the first login (onboarding not wired yet)", async () => {
     const user = userEvent.setup();
     mockLogin(() =>
       jsonResponse(authenticatedSession({ needs_onboarding: true })),
@@ -105,22 +105,19 @@ describe("Login form", () => {
     await fillAndSubmit(user);
 
     expect(
-      await screen.findByRole("heading", {
-        level: 1,
-        name: "Bienvenue sur Nexus",
-      }),
+      await screen.findByRole("heading", { level: 1, name: "Mes casiers" }),
     ).toBeInTheDocument();
   });
 
   it("comes back to the page that required logging in", async () => {
     const user = userEvent.setup();
     mockLogin(() => jsonResponse(authenticatedSession()));
-    renderApp("/casiers");
+    renderApp("/");
 
     await fillAndSubmit(user);
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Mes casiers" }),
+      await screen.findByRole("heading", { level: 1, name: "Tableau de bord" }),
     ).toBeInTheDocument();
   });
 

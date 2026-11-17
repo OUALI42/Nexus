@@ -257,3 +257,9 @@ CACHES = {
         "LOCATION": env("REDIS_URL", default="redis://redis:6379/0"),
     }
 }
+
+
+# --- Demo data (manage.py seed_demo) ---
+# Only dev.py enables it: the command refuses to run anywhere else.
+ALLOW_DEMO_SEED = False
+DEMO_ACCOUNT_PASSWORD = env("DEMO_ACCOUNT_PASSWORD", default="")

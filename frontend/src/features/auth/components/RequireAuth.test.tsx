@@ -1,14 +1,6 @@
 import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
-
-import { expectNoAxeViolations } from "@/test/axe";
-import {
-  clearCsrfCookie,
-  jsonResponse,
-  mockFetch,
-  urlOf,
-} from "@/test/mockFetch";
+import { clearCsrfCookie, jsonResponse, mockFetch } from "@/test/mockFetch";
 import { renderApp } from "@/test/renderApp";
 import { ANONYMOUS_SESSION, authenticatedSession } from "@/test/sessions";
 
@@ -29,18 +21,15 @@ describe("Route guards", () => {
     ).toBeInTheDocument();
   });
 
-  it("sends a new user to the onboarding, whatever the page", async () => {
+  it("does not send new users to the onboarding while it is not wired", async () => {
     mockFetch({
       "/auth/session/": () =>
         jsonResponse(authenticatedSession({ needs_onboarding: true })),
     });
-    renderApp("/casiers");
+    renderApp("/bienvenue");
 
     expect(
-      await screen.findByRole("heading", {
-        level: 1,
-        name: "Bienvenue sur Nexus",
-      }),
+      await screen.findByRole("heading", { level: 1, name: "Mes casiers" }),
     ).toBeInTheDocument();
   });
 
@@ -52,7 +41,7 @@ describe("Route guards", () => {
     renderApp("/connexion");
 
     expect(
-      await screen.findByRole("heading", { level: 1, name: "Tableau de bord" }),
+      await screen.findByRole("heading", { level: 1, name: "Mes casiers" }),
     ).toBeInTheDocument();
   });
 
@@ -66,51 +55,5 @@ describe("Route guards", () => {
     expect(
       screen.getByRole("button", { name: "Réessayer" }),
     ).toBeInTheDocument();
-  });
-
-  it("finishes the onboarding and opens the dashboard", async () => {
-    const user = userEvent.setup();
-    let onboardingDone = false;
-    const fetchMock = mockFetch({
-      "/auth/session/": () =>
-        jsonResponse(
-          authenticatedSession({ needs_onboarding: !onboardingDone }),
-        ),
-      "/auth/onboarding/complete/": () => {
-        onboardingDone = true;
-        return new Response(null, { status: 204 });
-      },
-      ...HEALTH,
-    });
-    renderApp("/bienvenue");
-
-    await user.click(
-      await screen.findByRole("button", {
-        name: "Accéder à mon tableau de bord",
-      }),
-    );
-
-    expect(
-      await screen.findByRole("heading", { level: 1, name: "Tableau de bord" }),
-    ).toBeInTheDocument();
-    expect(
-      fetchMock.mock.calls.some(([input]) =>
-        urlOf(input).endsWith("/auth/onboarding/complete/"),
-      ),
-    ).toBe(true);
-  });
-
-  it("has no WCAG A/AA violations on the onboarding page", async () => {
-    mockFetch({
-      "/auth/session/": () =>
-        jsonResponse(authenticatedSession({ needs_onboarding: true })),
-    });
-    renderApp("/bienvenue");
-    await screen.findByRole("heading", {
-      level: 1,
-      name: "Bienvenue sur Nexus",
-    });
-
-    await expectNoAxeViolations(document.body);
   });
 });
