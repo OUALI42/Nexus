@@ -1,10 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-
 import { Button } from "@/shared/ui/Button";
 import { PageHeader } from "@/shared/ui/PageHeader";
-
 import { authKeys, useCompleteOnboarding, useSession } from "../hooks";
+import { HOME_AFTER_LOGIN } from "../config";
 
 export function OnboardingPage() {
   const navigate = useNavigate();
@@ -17,7 +16,7 @@ export function OnboardingPage() {
       onSuccess: () => {
         void queryClient
           .invalidateQueries({ queryKey: authKeys.session })
-          .then(() => navigate("/", { replace: true }));
+          .then(() => navigate(HOME_AFTER_LOGIN, { replace: true }));
       },
     });
   }
@@ -39,7 +38,7 @@ export function OnboardingPage() {
           </p>
         )}
         <Button isLoading={completion.isPending} onClick={finish}>
-          Accéder à mon tableau de bord
+          Accéder à mes casiers
         </Button>
       </div>
     </>

@@ -1,9 +1,8 @@
 import { Navigate, Outlet, useLocation } from "react-router";
 import { z } from "zod";
-
 import { FullPageStatus } from "@/shared/ui/FullPageStatus";
-
 import { useSession } from "../hooks";
+import { HOME_AFTER_LOGIN } from "../config";
 
 // Internal paths only: "//evil.example" would leave the site.
 const redirectStateSchema = z.object({
@@ -22,10 +21,10 @@ export function RedirectIfAuthenticated() {
     return <FullPageStatus>Chargement…</FullPageStatus>;
   }
   if (session.data?.authenticated) {
-    // Back to the page that required logging in, or the dashboard.
-    // RequireAuth then sends to the onboarding if it is not finished.
+    // Back to the page that required logging in, or "Mes casiers".
     const from =
-      redirectStateSchema.safeParse(location.state).data?.from ?? "/";
+      redirectStateSchema.safeParse(location.state).data?.from ??
+      HOME_AFTER_LOGIN;
     return <Navigate to={from} replace />;
   }
   return <Outlet />;
