@@ -109,7 +109,9 @@ function NewLockerForm({ choices }: { choices: LockerChoices }) {
           return;
         }
         setFormError(
-          isApiError(error) ? error.message : "Une erreur inattendue est survenue.",
+          isApiError(error)
+            ? error.message
+            : "Une erreur inattendue est survenue.",
         );
       },
     });
@@ -151,7 +153,7 @@ function NewLockerForm({ choices }: { choices: LockerChoices }) {
         error={errors.color}
         renderOption={(option, checked) => (
           <span
-            className="flex size-11 items-center justify-center rounded-control text-white"
+            className="text-white flex size-11 items-center justify-center rounded-control"
             style={{ backgroundColor: option.value }}
           >
             {checked && <Check aria-hidden="true" className="size-6" />}
@@ -173,17 +175,20 @@ function NewLockerForm({ choices }: { choices: LockerChoices }) {
             <span
               className={cx(
                 "flex size-11 items-center justify-center rounded-control border-2",
-                checked ? "border-transparent text-white" : "border-line",
+                checked ? "text-white border-transparent" : "border-line",
               )}
               style={checked ? { backgroundColor: values.color } : undefined}
-              >
+            >
               <LockerIcon name={option.value} className="size-6" />
             </span>
           );
         }}
       />
 
-      <section aria-labelledby={`${formId}-preview`} className="flex flex-col gap-2">
+      <section
+        aria-labelledby={`${formId}-preview`}
+        className="flex flex-col gap-2"
+      >
         <h2 id={`${formId}-preview`} className="font-semibold">
           Aperçu
         </h2>

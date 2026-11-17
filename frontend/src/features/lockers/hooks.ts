@@ -41,6 +41,7 @@ export function useCreateLocker() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createLocker,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: lockerKeys.all }),
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: lockerKeys.all }),
   });
 }

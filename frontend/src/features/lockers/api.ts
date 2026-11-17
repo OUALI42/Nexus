@@ -42,7 +42,9 @@ export function fetchLocker(id: number, signal?: AbortSignal): Promise<Locker> {
   return api.get(`/lockers/${id}/`, lockerSchema, signal);
 }
 
-export function fetchLockerChoices(signal?: AbortSignal): Promise<LockerChoices> {
+export function fetchLockerChoices(
+  signal?: AbortSignal,
+): Promise<LockerChoices> {
   return api.get("/lockers/choices/", lockerChoicesSchema, signal);
 }
 

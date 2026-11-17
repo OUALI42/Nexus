@@ -4,7 +4,6 @@ import { FieldError } from "@/shared/ui/FieldError";
 
 import type { LockerChoice } from "../api";
 
-
 type ChoiceRadioGroupProps = {
   legend: string;
   name: string;
@@ -26,7 +25,10 @@ export function ChoiceRadioGroup({
 }: ChoiceRadioGroupProps) {
   const errorId = useId();
   return (
-    <fieldset aria-describedby={error ? errorId : undefined} className="flex flex-col gap-2">
+    <fieldset
+      aria-describedby={error ? errorId : undefined}
+      className="flex flex-col gap-2"
+    >
       <legend className="mb-2 font-semibold">{legend}</legend>
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {

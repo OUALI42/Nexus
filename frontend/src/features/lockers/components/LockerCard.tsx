@@ -13,7 +13,7 @@ export function LockerCard({ locker }: { locker: Locker }) {
     >
       <LockerBadge color={locker.color} icon={locker.icon} />
       <span className="flex flex-col">
-        <span className="font-bold">{locker.name}</span>
+        <span className="font-bold">{locker.name}</span>{" "}
         <span>{courseCountLabel(locker.courseCount)}</span>
       </span>
     </Link>

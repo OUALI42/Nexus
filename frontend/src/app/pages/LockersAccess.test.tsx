@@ -6,7 +6,7 @@ import { expectNoAxeViolations } from "@/test/axe";
 import { clearCsrfCookie, jsonResponse, mockFetch } from "@/test/mockFetch";
 import { renderApp } from "@/test/renderApp";
 import { ANONYMOUS_SESSION, authenticatedSession } from "@/test/sessions";
-
+import { MATHS_LOCKER } from "@/test/lockers";
 afterEach(() => {
   vi.unstubAllGlobals();
   clearCsrfCookie();
@@ -30,6 +30,7 @@ describe("Access to Mes casiers", () => {
     mockFetch({
       "/auth/session/": () => jsonResponse(ANONYMOUS_SESSION),
       "/auth/login/": () => jsonResponse(authenticatedSession()),
+      "/lockers/": () => jsonResponse([MATHS_LOCKER]),
     });
     renderApp("/casiers");
 
@@ -51,7 +52,10 @@ describe("Access to Mes casiers", () => {
   });
 
   it("is shown to logged-in users, marked as the current page", async () => {
-    mockFetch({ "/auth/session/": () => jsonResponse(authenticatedSession()) });
+    mockFetch({
+      "/auth/session/": () => jsonResponse(authenticatedSession()),
+      "/lockers/": () => jsonResponse([MATHS_LOCKER]),
+    });
     renderApp("/casiers");
 
     expect(
@@ -98,9 +102,13 @@ describe("Access to Mes casiers", () => {
   });
 
   it("has no WCAG A/AA violations", async () => {
-    mockFetch({ "/auth/session/": () => jsonResponse(authenticatedSession()) });
+    mockFetch({
+      "/auth/session/": () => jsonResponse(authenticatedSession()),
+      "/lockers/": () => jsonResponse([MATHS_LOCKER]),
+    });
     renderApp("/casiers");
     await screen.findByRole("heading", { level: 1, name: "Mes casiers" });
+    await screen.findByRole("link", { name: "Mathématiques 3 cours" });
 
     await expectNoAxeViolations(document.body);
   });
