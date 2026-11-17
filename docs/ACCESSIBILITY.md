@@ -46,3 +46,47 @@ Objectif : WCAG 2.2 niveau AA, plus des cibles de 44 px (critère 2.5.5, niveau 
 Les éléments de 1 px de large sont exclus : ce sont les champs masqués du sélecteur de
 thème, dont la cible réelle est le label de 44 px. Les liens placés dans une phrase
 sont exemptés par la WCAG (critère 2.5.5).
+
+
+## Casiers et cours (S7)
+
+### Distinguer les casiers sans la couleur
+
+- Chaque casier affiche toujours son **nom** et une **icône**. La couleur n'est qu'un bandeau et un fond d'icône.
+- Toutes les couleurs de la palette atteignent au moins 4,5:1 avec le texte blanc (ADR-021).
+- Dans le formulaire, la couleur choisie porte une **coche** et l'icône choisie est **remplie**. Un aperçu montre le casier final.
+
+### Formulaire de création
+
+- Le nom est un champ avec libellé visible. Les erreurs (nom vide, nom déjà utilisé) s'affichent sous le champ, qui reprend le focus.
+- Couleurs et icônes : boutons radio natifs dans un `<fieldset>` avec sa `<legend>` (« Couleur », « Icône »). Navigation aux **flèches**, annonce du libellé (« Indigo, bouton radio, 1 sur 12 »), focus visible sur le libellé.
+- Toutes les cibles font au moins 44 × 44 px.
+
+### Dépôt d'un cours
+
+- Vrai `<input type="file">`, atteignable au Tab et ouvert avec Entrée ou Espace. Son nom accessible est « Ajouter un cours (PDF) ».
+- L'aide (« PDF uniquement, 10 Mo maximum. ») et l'erreur éventuelle sont reliées au champ par `aria-describedby` : elles sont lues quand on arrive sur le bouton.
+- L'envoi est annoncé dans une zone `role="status"` **présente en permanence**, même vide. Un lecteur d'écran n'annonce que les changements dans une zone qui existait déjà.
+- La fin de l'envoi est confirmée par un toast.
+
+### Noms accessibles complets
+
+- Une carte de casier est un seul lien : « Mathématiques 3 cours ».
+- Les actions d'un cours portent son titre : « Ouvrir Suites numériques (nouvel onglet) », « Télécharger Suites numériques ». Avec dix cours, la liste des liens reste compréhensible.
+- **Règle JSX** : une espace qui compte entre deux éléments s'écrit `{" "}`. Une espace en début de texte, suivie d'un retour à la ligne ajouté par Prettier, est supprimée, et le nom accessible devient « OuvrirSuites ». Les tests vérifient les noms exacts.
+
+### Nouvel onglet
+
+- L'ouverture d'un cours dans un nouvel onglet est annoncée par le texte (« nouvel onglet ») et montrée par une icône de lien externe.
+- Les liens ont `rel="noopener noreferrer"`.
+
+### Titres et focus
+
+- La page d'un casier a toujours un `<h1>` (« Casier » pendant le chargement, puis le nom du casier, ou « Casier introuvable »). La mise en page déplace le focus sur ce titre à chaque navigation.
+- Un casier inexistant, ou appartenant à un autre élève, affiche « Casier introuvable » avec un lien de retour.
+
+### Tests automatiques
+
+- axe (WCAG A/AA) sur la liste des casiers, le formulaire avec une erreur affichée et la page d'un casier avec ses cours.
+- Navigation aux flèches dans les groupes de couleurs et d'icônes.
+- Description accessible du champ de dépôt (aide et erreur).

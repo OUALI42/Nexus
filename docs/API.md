@@ -363,3 +363,140 @@ Les couleurs ont toutes un contraste d'au moins 4,5:1 avec un texte blanc (RGAA,
 | ----- | ------------------------------------ |
 | `200` | Listes des couleurs et des icônes    |
 | `403` | Pas de session (`not_authenticated`) |
+
+## Casiers et cours (S7)
+
+Toutes les routes de cette section exigent une session : sans session, la réponse est `403 not_authenticated`. Les requêtes `POST` exigent en plus l'en-tête `X-CSRFToken` (`403` sinon).
+
+Un élève n'accède qu'à ses propres casiers et cours. La ressource d'un autre élève répond `404`, exactement comme une ressource inexistante : son existence n'est jamais révélée (ADR-009).
+
+### Liste de mes casiers
+
+`GET /api/v1/lockers/`
+
+Réponse `200` : les casiers de l'élève, triés par position puis par nom.
+
+```json
+[
+  {
+    "id": 9,
+    "name": "Mathématiques",
+    "color": "#4338ca",
+    "icon": "sigma",
+    "position": 0,
+    "course_count": 3
+  }
+]
+```
+
+`course_count` ne compte que les documents de type cours (`kind = "course"`).
+
+### Créer un casier
+
+`POST /api/v1/lockers/`
+
+```json
+{ "name": "Philosophie", "color": "#0e7490", "icon": "book-open" }
+```
+
+| Champ | Règle |
+| --- | --- |
+| `name` | Obligatoire, espaces de début et de fin supprimés, unique par élève **sans tenir compte de la casse ni des accents** |
+| `color` | Une valeur de la palette (`/choices/`) |
+| `icon` | Une valeur de la liste d'icônes (`/choices/`), `folder` par défaut |
+
+Tout autre champ envoyé (`owner`, `position`…) est ignoré. Le propriétaire est toujours l'élève connecté, et le casier est placé en fin de liste.
+
+| Code | Cas |
+| --- | --- |
+| `201` | Casier créé (même format que la liste, `course_count` à 0) |
+| `400` | `details.name` (vide, ou « Tu as déjà un casier avec ce nom. »), `details.color`, `details.icon` |
+
+### Détail d'un casier
+
+`GET /api/v1/lockers/<id>/`
+
+| Code | Cas |
+| --- | --- |
+| `200` | Le casier (même format que la liste) |
+| `404` | Casier inexistant ou appartenant à un autre élève |
+
+### Couleurs et icônes autorisées
+
+`GET /api/v1/lockers/choices/`
+
+```json
+{
+  "colors": [{ "value": "#4338ca", "label": "Indigo" }],
+  "icons": [{ "value": "folder", "label": "Dossier" }]
+}
+```
+
+Les libellés servent aux lecteurs d'écran. Le front ne propose que ces valeurs.
+
+### Cours d'un casier
+
+`GET /api/v1/lockers/<id>/courses/`
+
+Réponse `200` : les cours du casier, du plus récent au plus ancien.
+
+```json
+[
+  {
+    "id": 7,
+    "title": "Suites numériques",
+    "size_bytes": 1258291,
+    "analysis_status": "pending",
+    "created_at": "2026-11-17T10:00:00Z",
+    "file_url": "/api/v1/courses/7/file/"
+  }
+]
+```
+
+`analysis_status` vaut `pending`, `processing`, `ready` ou `failed`. Le chemin de stockage du fichier n'est jamais exposé : on y accède uniquement par `file_url`.
+
+`404` si le casier est inexistant ou appartient à un autre élève.
+
+### Déposer un cours
+
+`POST /api/v1/lockers/<id>/courses/`, en `multipart/form-data`, avec le fichier dans le champ `file`.
+
+Contrôles, dans l'ordre :
+
+1. Le casier appartient à l'élève (`404` sinon).
+2. L'en-tête `Content-Length` ne dépasse pas la limite de l'offre (`413` sinon, sans lire le corps de la requête).
+3. Le fichier n'est pas vide et sa taille réelle respecte la limite de l'offre.
+4. Le fichier commence par la signature `%PDF-`. L'extension et le `Content-Type` envoyés par le navigateur sont ignorés.
+
+| Code | Cas |
+| --- | --- |
+| `201` | Cours créé (même format que la liste) |
+| `400` | `details.file` : « Ce fichier n'est pas un PDF. », fichier vide, ou taille maximale dépassée |
+| `413` | `file_too_large` : requête refusée avant lecture |
+| `404` | Casier inexistant ou appartenant à un autre élève |
+
+Le titre affiché est le nom d'origine sans son extension. Le fichier est stocké sous un nom aléatoire (UUID).
+
+### Ouvrir ou télécharger un cours
+
+`GET /api/v1/courses/<id>/file/`
+
+| Paramètre | Effet |
+| --- | --- |
+| *(aucun)* | Affichage dans le navigateur (`Content-Disposition: inline`) |
+| `?download=1` | Téléchargement (`Content-Disposition: attachment`) avec le nom d'origine |
+
+En-têtes de la réponse : `Content-Type: application/pdf`, `X-Content-Type-Options: nosniff`, `Cache-Control: private, no-store`.
+
+| Code | Cas |
+| --- | --- |
+| `200` | Le fichier, envoyé en flux |
+| `404` | Cours inexistant, appartenant à un autre élève, ou fichier absent du disque (journalisé côté serveur) |
+
+### Session : limite de taille
+
+`GET /api/v1/auth/session/` expose maintenant la limite de l'offre, qui permet au front d'annoncer « 10 Mo maximum » et de refuser un fichier trop gros sans l'envoyer :
+
+```json
+"plan": { "code": "basic", "name": "Basique", "max_file_size_bytes": 10485760 }
+```

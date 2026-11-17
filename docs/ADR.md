@@ -450,3 +450,124 @@ l'application sans passer par l'inscription, sans jamais exposer de mot de passe
 **Conséquences.**
 - Les cours de démo passent la vérification de signature PDF prévue en S7.
 - La S7 devra compléter les données de démo avec les icônes des casiers.
+
+## ADR-021 — Icônes et couleurs des casiers en listes fermées
+
+- **Date** : 17/11/2026
+- **Statut** : Acceptée
+- **Story** : S7
+
+### Contexte
+
+L'élève personnalise ses casiers avec une couleur et une icône. Deux exigences RGAA s'appliquent : la couleur ne doit jamais être le seul moyen de distinguer un casier, et le texte blanc posé sur la couleur doit rester lisible (contraste AA, 4,5:1). Une valeur libre (n'importe quel code hexadécimal, n'importe quel nom d'icône) ne permet de garantir ni l'un ni l'autre.
+
+### Décision
+
+- **Icônes** : une liste fermée de 16 icônes de la bibliothèque lucide (`LockerIcon`, `TextChoices`), protégée par une contrainte `CHECK` en base. Le nom du casier est toujours affiché à côté de l'icône.
+- **Couleurs** : une palette fermée de 12 couleurs, toutes à au moins 4,5:1 avec le blanc, vérifiée par le serializer uniquement.
+- **Source unique de vérité** : l'API expose les deux listes et leurs libellés (`GET /lockers/choices/`). Le front ne propose que ces valeurs.
+
+La différence de traitement est volontaire : une icône inconnue **casse l'affichage** (le front ne sait pas la dessiner), alors qu'une couleur hors palette **s'affiche quand même**. La palette relève du design et doit pouvoir évoluer sans migration ni blocage des casiers existants.
+
+### Conséquences
+
+- Ajouter une icône demande une migration et son ajout dans `frontend/src/features/lockers/icons.tsx`. En attendant, le front affiche un dossier pour toute icône inconnue.
+- Les couleurs venant de l'API, elles sont appliquées par l'attribut `style`. La future politique CSP devra l'autoriser (`style-src-attr`) ou passer par des variables CSS.
+
+### Alternatives écartées
+
+- **Sélecteur de couleur libre** : contraste impossible à garantir.
+- **Contrainte `CHECK` sur la couleur** : chaque changement de palette imposerait une migration.
+
+---
+
+## ADR-022 — Contrôle des fichiers déposés
+
+- **Date** : 17/11/2026
+- **Statut** : Acceptée
+- **Story** : S7
+
+### Contexte
+
+Les élèves déposent leurs cours en PDF. Le nom, l'extension et le type annoncés par le navigateur sont entièrement contrôlés par le client : un exécutable renommé en `cours.pdf` arrive avec `Content-Type: application/pdf`. La taille maximale dépend de l'offre de l'élève.
+
+### Décision
+
+Contrôles dans cet ordre :
+
+1. **Propriétaire** : le casier doit appartenir à l'élève, sinon `404`. Ce contrôle passe en premier pour qu'aucune autre erreur ne révèle l'existence du casier d'un autre élève.
+2. **Taille annoncée** : si l'en-tête `Content-Length` dépasse la limite (plus une marge de 64 Kio pour l'enveloppe multipart), la réponse est `413` sans lire le corps. Sinon, Django écrirait d'abord le fichier entier sur le disque.
+3. **Taille réelle** : comparée à `billing_plan.max_file_size_bytes` (10 Mo par défaut pour un compte sans offre).
+4. **Signature** : les 5 premiers octets doivent être `%PDF-`.
+5. **Stockage** : nom aléatoire (UUID), nom d'origine conservé à part pour l'affichage et le téléchargement, empreinte SHA-256 calculée par morceaux, type forcé à `application/pdf`.
+6. **Atomicité** : si l'insertion en base échoue, le fichier déjà écrit est supprimé.
+
+### Conséquences
+
+- La signature prouve qu'un fichier **commence** comme un PDF, pas qu'il est sain : un PDF peut contenir du JavaScript. La protection porte sur la façon de le servir (ADR-023). Un antivirus n'est pas prévu dans cette version.
+- En production, le proxy devra aussi limiter la taille des requêtes (`client_max_body_size` dans nginx).
+
+### Alternatives écartées
+
+- **`python-magic`** : dépend de la bibliothèque système `libmagic`, inutile pour un seul format.
+- **Limite fixe dans le code** : la limite varie selon l'offre et existe déjà en base depuis la S1.
+
+---
+
+## ADR-023 — Accès aux cours réservé à leur propriétaire
+
+- **Date** : 17/11/2026
+- **Statut** : Acceptée
+- **Story** : S7
+
+### Contexte
+
+Un fichier placé dans `MEDIA_ROOT` et servi directement est accessible à quiconque connaît son URL. Le nom aléatoire rend l'URL difficile à deviner, mais ce n'est pas un contrôle d'accès : une URL fuit (historique, capture d'écran, lien partagé). Les cours sont des données personnelles.
+
+### Décision
+
+- **Aucune URL publique** : ni `static()` sur `MEDIA_URL` en développement, ni bloc `location /media` dans nginx en production.
+- **Un seul accès** : `GET /api/v1/courses/<id>/file/`, qui filtre sur le propriétaire (`404` sinon) et envoie le fichier en flux (`FileResponse`).
+- **En-têtes** :
+  - `Content-Type: application/pdf` forcé, avec `nosniff`, pour qu'un fichier ne soit jamais interprété comme une page HTML ;
+  - `Cache-Control: private, no-store`, pour qu'aucun cache partagé ni le navigateur ne garde de copie.
+- **Affichage** : `inline` par défaut, `attachment` avec `?download=1`. Le nom d'origine est proposé au téléchargement.
+- L'API ne renvoie jamais le chemin de stockage, seulement `file_url`.
+
+### Conséquences
+
+- Le front ouvre les cours avec de simples liens `<a href>` : le navigateur envoie le cookie de session tout seul.
+- **Compromis** : l'en-tête `Content-Security-Policy: sandbox` aurait isolé davantage le PDF, mais il empêche l'affichage par le lecteur PDF de Chrome. On s'appuie sur l'isolation des lecteurs PDF intégrés aux navigateurs.
+
+### Alternatives écartées
+
+- **URL signées temporaires** : utiles avec un stockage objet (S3), superflues avec le disque local.
+- **`X-Accel-Redirect` (nginx)** : décharge Django de l'envoi des gros fichiers. À envisager en production si la charge le justifie.
+
+---
+
+## ADR-024 — Formulaires des casiers accessibles grâce aux éléments natifs
+
+- **Date** : 17/11/2026
+- **Statut** : Acceptée
+- **Story** : S7
+
+### Contexte
+
+La création d'un casier (nom, couleur, icône) et le dépôt d'un cours doivent être utilisables au clavier et avec un lecteur d'écran, avec des cibles de 44 px.
+
+### Décision
+
+- **Création sur une page dédiée** (`/casiers/nouveau`) plutôt que dans une modale. Une modale accessible impose de gérer le piège du focus, la touche Échap et le retour du focus, et elle est pénible sur mobile avec le clavier virtuel. La page dédiée a son URL et fonctionne avec le bouton Retour.
+- **Contrôles natifs masqués visuellement** : les couleurs et les icônes sont de vrais `<input type="radio">` regroupés dans un `<fieldset>` avec sa `<legend>`, et le dépôt est un vrai `<input type="file">`. Ils sont masqués avec `sr-only` mais restent dans la page. On hérite ainsi de la navigation aux flèches, de l'ouverture avec Entrée ou Espace, et des annonces des lecteurs d'écran, sans rien recoder.
+- **Sélection jamais portée par la teinte seule** : une coche sur la couleur choisie, le remplissage de l'icône choisie, et un aperçu du casier.
+
+### Conséquences
+
+- L'anneau de focus est porté par le libellé (`has-[:focus-visible]`), puisque le contrôle lui-même est invisible.
+- Le glisser-déposer n'est pas proposé : il n'est pas utilisable au clavier et ne pourra venir qu'en complément.
+
+### Alternatives écartées
+
+- **Boutons personnalisés avec `role="radio"`** : il faudrait recoder la navigation aux flèches et la gestion du focus.
+- **Bibliothèque de composants** : une dépendance de plus pour deux groupes de boutons radio.
