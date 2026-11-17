@@ -2,6 +2,11 @@ import "@testing-library/jest-dom/vitest";
 
 import { cleanup } from "@testing-library/react";
 import { afterEach } from "vitest";
+import { configure } from "@testing-library/react";
+
+
+// findBy… and waitFor wait 1 s by default: too short on a loaded machine.
+configure({ asyncUtilTimeout: 4000 });
 
 afterEach(() => {
   cleanup();

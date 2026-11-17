@@ -1,10 +1,6 @@
 import { screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  clearCsrfCookie,
-  jsonResponse,
-  mockFetch,
-} from "@/test/mockFetch";
+import { clearCsrfCookie, jsonResponse, mockFetch } from "@/test/mockFetch";
 import { renderApp } from "@/test/renderApp";
 import { ANONYMOUS_SESSION, authenticatedSession } from "@/test/sessions";
 
@@ -60,5 +56,4 @@ describe("Route guards", () => {
       screen.getByRole("button", { name: "Réessayer" }),
     ).toBeInTheDocument();
   });
-
 });
