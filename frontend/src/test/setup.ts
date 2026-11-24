@@ -37,3 +37,22 @@ if (typeof HTMLDialogElement !== "undefined") {
 if (typeof HTMLCanvasElement !== "undefined") {
   HTMLCanvasElement.prototype.getContext = () => null;
 }
+
+// ProseMirror (TipTap) measures the layout, which jsdom does not compute.
+// Skipped in the Node environment (e.g. tokens.test.ts), which has no DOM.
+if ("Range" in globalThis) {
+  const emptyRect = {
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    toJSON: () => ({}),
+  } as DOMRect;
+  Range.prototype.getBoundingClientRect = () => emptyRect;
+  Range.prototype.getClientRects = () => [] as unknown as DOMRectList;
+  document.elementFromPoint = () => null;
+}

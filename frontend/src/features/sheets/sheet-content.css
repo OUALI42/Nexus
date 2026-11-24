@@ -1,0 +1,49 @@
+/* Formatting of a sheet, in the editor and on the reading page. */
+.sheet-content > :first-child {
+  margin-top: 0;
+}
+
+.sheet-content h2 {
+  margin: 1.25rem 0 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.sheet-content h3 {
+  margin: 1rem 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.sheet-content p {
+  margin: 0.5rem 0;
+}
+
+.sheet-content ul,
+.sheet-content ol {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.sheet-content ul {
+  list-style: disc;
+}
+
+.sheet-content ol {
+  list-style: decimal;
+}
+
+.sheet-content blockquote {
+  margin: 0.75rem 0;
+  border-left: 4px solid currentColor;
+  padding-left: 1rem;
+  font-style: italic;
+}
+
+.sheet-content code {
+  font-family: ui-monospace, monospace;
+}
+
+.sheet-content a {
+  text-decoration: underline;
+}
