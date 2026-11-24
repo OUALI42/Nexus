@@ -8,6 +8,7 @@ from apps.billing.models import Subscription
 from apps.core.demo.data import DEMO_EMAILS
 from apps.core.demo.pdf import build_pdf
 from apps.documents.models import Document
+from apps.revision.models import RevisionSheet
 from apps.subjects.models import Subject
 
 pytestmark = pytest.mark.django_db
@@ -154,3 +155,17 @@ def test_build_pdf_produces_a_complete_pdf_with_accents():
     assert content.startswith(b"%PDF-1.4")
     assert content.rstrip().endswith(b"%%EOF")
     assert "Intégration".encode("cp1252") in content
+
+
+# --- Revision sheets ----------------------------------------------------
+
+
+def test_demo_lockers_get_their_icon_and_their_revision_sheets(demo_settings):
+    run_seed()
+
+    assert RevisionSheet.objects.count() == 4
+    sheet = RevisionSheet.objects.get(title="Suites numériques : l'essentiel")
+    assert sheet.owner.email == "demo.ines@nexus.test"
+    assert sheet.subject.name == "Mathématiques"
+    assert sheet.subject.icon == "sigma"
+    assert "ε &gt; 0" in sheet.content

@@ -7,3 +7,4 @@ drf-spectacular>=0.28
 django-filter>=25.1
 django-axes[ipware]==9.0.0
 redis==8.1.0
+nh3==0.3.8
