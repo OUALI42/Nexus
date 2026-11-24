@@ -35,3 +35,12 @@ def test_deleting_a_locker_deletes_its_sheets(user, locker):
     locker.delete()
 
     assert not RevisionSheet.objects.exists()
+
+
+def test_any_save_sanitizes_the_content_even_outside_the_api(user, locker):
+    sheet = RevisionSheet.objects.create(
+        owner=user, subject=locker, title="Admin", content="<p>ok</p><script>x</script>"
+    )
+
+    sheet.refresh_from_db()
+    assert sheet.content == "<p>ok</p>"

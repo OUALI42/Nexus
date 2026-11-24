@@ -3,6 +3,8 @@ from django.db import models
 
 from apps.core.models import ContentSource, TimeStampedModel
 
+from .sanitizer import sanitize_sheet_html
+
 
 class RevisionSheet(TimeStampedModel):
     owner = models.ForeignKey(
@@ -52,3 +54,9 @@ class RevisionSheet(TimeStampedModel):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        # Security invariant: no HTML reaches the database without the allowlist,
+        # whatever the path (API, admin, seed, future AI jobs).
+        self.content = sanitize_sheet_html(self.content)
+        super().save(*args, **kwargs)
