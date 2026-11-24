@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { expectNoAxeViolations } from "@/test/axe";
-import { MATHS_LOCKER, SUITES_COURSE } from "@/test/lockers";
+import { MATHS_LOCKER, SUITES_COURSE, SUITES_SHEET } from "@/test/lockers";
 import {
   clearCsrfCookie,
   jsonResponse,
@@ -21,12 +21,14 @@ afterEach(() => {
 type Options = {
   session?: unknown;
   courses?: unknown[];
+  sheets?: unknown[];
   upload?: () => Response;
 };
 
 function mockLocker({
   session = authenticatedSession(),
   courses = [SUITES_COURSE],
+  sheets = [SUITES_SHEET],
   upload = () => jsonResponse(SUITES_COURSE, 201),
 }: Options = {}) {
   return mockFetch({
@@ -34,6 +36,7 @@ function mockLocker({
     "/lockers/1/": () => jsonResponse(MATHS_LOCKER),
     "/lockers/1/courses/": (init) =>
       init?.method === "POST" ? upload() : jsonResponse(courses),
+    "/lockers/1/sheets/": () => jsonResponse(sheets),
   });
 }
 
@@ -187,6 +190,35 @@ describe("Locker page", () => {
     ).toBeInTheDocument();
     const urls = fetchMock.mock.calls.map(([input]) => urlOf(input));
     expect(urls.some((url) => url.includes("/lockers/"))).toBe(false);
+  });
+
+  it("shows the sheets of the locker next to its courses", async () => {
+    mockLocker();
+    renderApp("/casiers/1");
+
+    expect(
+      await screen.findByRole("link", {
+        name: "Suites numériques : l'essentiel Modifiée le 20 novembre 2026",
+      }),
+    ).toHaveAttribute("href", "/fiches/12");
+    expect(
+      screen.getByRole("link", { name: "Nouvelle fiche" }),
+    ).toHaveAttribute("href", "/casiers/1/fiches/nouvelle");
+    expect(
+      screen.getByRole("heading", { level: 2, name: "Fiches" }),
+    ).toBeInTheDocument();
+  });
+
+  it("says when the locker has no sheet yet", async () => {
+    mockLocker({ sheets: [] });
+    renderApp("/casiers/1");
+
+    expect(
+      await screen.findByText("Aucune fiche dans ce casier pour l'instant."),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: "Nouvelle fiche" }),
+    ).toBeInTheDocument();
   });
 
   it("has no WCAG A/AA violations", async () => {

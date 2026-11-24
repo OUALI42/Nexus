@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 import { useSession } from "@/features/auth/hooks";
+import { LockerSheets } from "@/features/sheets/components/LockerSheets";
 import { isApiError } from "@/shared/api";
 import { Button } from "@/shared/ui/Button";
 
@@ -120,6 +121,8 @@ function LockerContent({ lockerId }: { lockerId: number }) {
               <CourseList courses={courses.data} />
             )}
           </section>
+
+          <LockerSheets lockerId={lockerId} />
         </>
       )}
     </div>
