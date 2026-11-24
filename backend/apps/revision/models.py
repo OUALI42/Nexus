@@ -12,9 +12,7 @@ class RevisionSheet(TimeStampedModel):
     )
     subject = models.ForeignKey(
         "subjects.Subject",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name="revision_sheets",
     )
     ai_job = models.ForeignKey(
@@ -25,7 +23,7 @@ class RevisionSheet(TimeStampedModel):
         related_name="revision_sheets",
     )
     title = models.CharField(max_length=255)
-    content = models.TextField(blank=True)  # Markdown, LONGTEXT on MySQL
+    content = models.TextField(blank=True)  # Sanitized HTML (nh3), LONGTEXT on MySQL
     source = models.CharField(
         max_length=10, choices=ContentSource.choices, default=ContentSource.MANUAL
     )
@@ -40,6 +38,15 @@ class RevisionSheet(TimeStampedModel):
         indexes = [
             models.Index(
                 fields=["owner", "-updated_at"], name="sheet_owner_updated_idx"
+            ),
+            models.Index(
+                fields=["subject", "-updated_at"], name="sheet_subject_updated_idx"
+            ),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(title=""),
+                name="sheet_title_not_empty",
             ),
         ]
 
