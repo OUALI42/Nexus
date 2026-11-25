@@ -9,6 +9,8 @@ from django.utils.timezone import now
 from apps.accounts.models import Profile, User
 from apps.billing.models import Plan, Subscription
 from apps.documents.models import Document
+from apps.revision.models import RevisionSheet
+from apps.revision.sanitizer import sanitize_sheet_html
 from apps.subjects.models import Subject
 
 from .data import DEMO_EMAILS, DEMO_STUDENTS, DemoCourse
@@ -24,7 +26,7 @@ class SeedReport:
 
 
 def reset_demo_data() -> int:
-    """Deletes the demo accounts; their lockers and courses follow (CASCADE)."""
+    """Deletes the demo accounts; their lockers, courses and sheets follow (CASCADE)."""
     users = User.objects.filter(email__in=DEMO_EMAILS)
     count = users.count()
     users.delete()
@@ -64,13 +66,25 @@ def seed_demo_data(password: str) -> SeedReport:
             subject, created = Subject.objects.get_or_create(
                 owner=user,
                 name=locker.name,
-                defaults={"color": locker.color, "position": position},
+                defaults={
+                    "color": locker.color,
+                    "icon": locker.icon,
+                    "position": position,
+                },
             )
             if created:
                 report.lockers_created += 1
             for course in locker.courses:
                 if _create_course(user, subject, course):
                     report.courses_created += 1
+            for sheet in locker.sheets:
+                # Every HTML goes through the sanitizer, even our own demo content.
+                RevisionSheet.objects.get_or_create(
+                    owner=user,
+                    subject=subject,
+                    title=sheet.title,
+                    defaults={"content": sanitize_sheet_html(sheet.content)},
+                )
 
     return report
 

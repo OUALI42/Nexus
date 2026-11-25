@@ -10,11 +10,18 @@ class DemoCourse:
 
 
 @dataclass(frozen=True)
+class DemoSheet:
+    title: str
+    content: str
+
+
+@dataclass(frozen=True)
 class DemoLocker:
     name: str
     color: str
     icon: str = "folder"
     courses: list[DemoCourse] = field(default_factory=list)
+    sheets: list[DemoSheet] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -65,6 +72,20 @@ DEMO_STUDENTS = [
                         ],
                     ),
                 ],
+                sheets=[
+                    DemoSheet(
+                        title="Suites numériques : l'essentiel",
+                        content=(
+                            "<h2>Convergence</h2>"
+                            "<p>Une suite <strong>converge</strong> vers ℓ si, pour tout ε > 0, "
+                            "ses termes finissent par rester à moins de ε de ℓ.</p>"
+                            "<h2>À retenir</h2>"
+                            "<ul><li>Toute suite convergente est bornée.</li>"
+                            "<li>Une suite croissante et majorée converge "
+                            "(<em>théorème de la limite monotone</em>).</li></ul>"
+                        ),
+                    ),
+                ],
             ),
             DemoLocker(
                 name="Physique-Chimie",
@@ -80,6 +101,16 @@ DEMO_STUDENTS = [
                             "Le théorème de l'énergie cinétique relie la "
                             "variation d'énergie cinétique au travail des forces.",
                         ],
+                    ),
+                ],
+                sheets=[
+                    DemoSheet(
+                        title="Lois de Snell-Descartes",
+                        content=(
+                            "<h2>Réfraction</h2>"
+                            "<p><strong>n₁ sin i₁ = n₂ sin i₂</strong></p>"
+                            "<p>Réflexion totale possible seulement si n₁ > n₂.</p>"
+                        ),
                     ),
                 ],
             ),
@@ -126,6 +157,17 @@ DEMO_STUDENTS = [
                         ],
                     ),
                 ],
+                sheets=[
+                    DemoSheet(
+                        title="La cellule eucaryote",
+                        content=(
+                            "<h2>Compartiments</h2>"
+                            "<ul><li><strong>Noyau</strong> : information génétique</li>"
+                            "<li><strong>Mitochondrie</strong> : respiration cellulaire</li>"
+                            "<li><strong>Réticulum endoplasmique</strong> : synthèse des protéines</li></ul>"
+                        ),
+                    ),
+                ],
             ),
             DemoLocker(
                 name="Chimie",
@@ -165,6 +207,19 @@ DEMO_STUDENTS = [
                             "L'élasticité-prix mesure la sensibilité de la "
                             "demande à une variation du prix.",
                         ],
+                    ),
+                ],
+                sheets=[
+                    DemoSheet(
+                        title="Les sources de la croissance",
+                        content=(
+                            "<h2>Facteurs de production</h2>"
+                            "<p>La croissance vient du <strong>travail</strong>, du "
+                            "<strong>capital</strong> et de la <em>productivité globale "
+                            "des facteurs</em> (résidu de Solow).</p>"
+                            "<blockquote>Le progrès technique explique l'essentiel de la "
+                            "croissance de long terme.</blockquote>"
+                        ),
                     ),
                 ],
             ),

@@ -500,3 +500,81 @@ En-têtes de la réponse : `Content-Type: application/pdf`, `X-Content-Type-Opti
 ```json
 "plan": { "code": "basic", "name": "Basique", "max_file_size_bytes": 10485760 }
 ```
+
+## Fiches de révision (S8)
+
+Toutes les routes de cette section exigent une session (`403 not_authenticated` sinon). Les requêtes `POST`, `PATCH` et `DELETE` exigent aussi l'en-tête `X-CSRFToken`.
+
+La fiche d'un autre élève, ou une fiche dans le casier d'un autre élève, répond `404`, exactement comme une ressource inexistante (ADR-009).
+
+### Fiches d'un casier
+
+`GET /api/v1/lockers/<id>/sheets/`
+
+Réponse `200` : les fiches du casier, de la plus récemment modifiée à la plus ancienne. Le contenu n'est **pas** inclus.
+
+```json
+[
+  {
+    "id": 12,
+    "title": "Suites numériques : l'essentiel",
+    "created_at": "2026-11-18T09:00:00Z",
+    "updated_at": "2026-11-20T09:00:00Z"
+  }
+]
+```
+
+### Créer une fiche
+
+`POST /api/v1/lockers/<id>/sheets/`
+
+```json
+{ "title": "Suites", "content": "<h2>Convergence</h2><p>…</p>" }
+```
+
+| Champ | Règle |
+| --- | --- |
+| `title` | Obligatoire, espaces de début et de fin supprimés, 255 caractères maximum |
+| `content` | Facultatif, HTML de 100 000 caractères maximum (avant nettoyage) |
+
+Tout autre champ (`owner`, `subject`, `source`…) est ignoré. Le contenu est **nettoyé côté serveur** avant l'enregistrement (liste blanche, ADR-026) : la réponse renvoie le contenu tel qu'il a été enregistré.
+
+| Code | Cas |
+| --- | --- |
+| `201` | Fiche créée (format détaillé ci-dessous) |
+| `400` | `details.title` (« Donne un titre à ta fiche. »), `details.content` (trop long) |
+| `404` | Casier inexistant ou appartenant à un autre élève |
+
+### Lire une fiche
+
+`GET /api/v1/sheets/<id>/`
+
+```json
+{
+  "id": 12,
+  "locker_id": 1,
+  "title": "Suites numériques : l'essentiel",
+  "content": "<h2>Convergence</h2><p>Une suite converge…</p>",
+  "source": "manual",
+  "created_at": "2026-11-18T09:00:00Z",
+  "updated_at": "2026-11-20T09:00:00Z"
+}
+```
+
+### Modifier une fiche
+
+`PATCH /api/v1/sheets/<id>/` avec `title` et/ou `content` (mêmes règles que la création). Un champ absent n'est pas modifié.
+
+| Code | Cas |
+| --- | --- |
+| `200` | Fiche modifiée, contenu nettoyé |
+| `400` | Mêmes erreurs que la création |
+| `404` | Fiche inexistante ou appartenant à un autre élève |
+
+### Supprimer une fiche
+
+`DELETE /api/v1/sheets/<id>/` : `204` si la fiche est supprimée, `404` sinon. Le front demande une confirmation avant d'appeler cette route.
+
+### Limite connue
+
+Si la même fiche est modifiée dans deux onglets, le dernier enregistrement écrase l'autre sans avertissement. Une protection par version (`updated_at` renvoyé et vérifié) est possible dans une version suivante.

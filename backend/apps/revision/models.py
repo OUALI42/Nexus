@@ -3,6 +3,8 @@ from django.db import models
 
 from apps.core.models import ContentSource, TimeStampedModel
 
+from .sanitizer import sanitize_sheet_html
+
 
 class RevisionSheet(TimeStampedModel):
     owner = models.ForeignKey(
@@ -12,9 +14,7 @@ class RevisionSheet(TimeStampedModel):
     )
     subject = models.ForeignKey(
         "subjects.Subject",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.CASCADE,
         related_name="revision_sheets",
     )
     ai_job = models.ForeignKey(
@@ -25,7 +25,7 @@ class RevisionSheet(TimeStampedModel):
         related_name="revision_sheets",
     )
     title = models.CharField(max_length=255)
-    content = models.TextField(blank=True)  # Markdown, LONGTEXT on MySQL
+    content = models.TextField(blank=True)  # Sanitized HTML (nh3), LONGTEXT on MySQL
     source = models.CharField(
         max_length=10, choices=ContentSource.choices, default=ContentSource.MANUAL
     )
@@ -41,7 +41,22 @@ class RevisionSheet(TimeStampedModel):
             models.Index(
                 fields=["owner", "-updated_at"], name="sheet_owner_updated_idx"
             ),
+            models.Index(
+                fields=["subject", "-updated_at"], name="sheet_subject_updated_idx"
+            ),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(title=""),
+                name="sheet_title_not_empty",
+            ),
         ]
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        # Security invariant: no HTML reaches the database without the allowlist,
+        # whatever the path (API, admin, seed, future AI jobs).
+        self.content = sanitize_sheet_html(self.content)
+        super().save(*args, **kwargs)

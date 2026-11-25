@@ -189,3 +189,38 @@ Routes (protégées par `RequireAuth`, sous `RootLayout`) :
 Les clés de cache commencent toutes par `["lockers"]`. Une création ou un dépôt invalide tout ce préfixe, ce qui met à jour la liste, les compteurs et les cours. La déconnexion vide tout le cache (`queryClient.clear()`), donc un élève ne voit jamais les casiers du précédent sur le même ordinateur.
 
 Le client d'API (`shared/api/client.ts`) envoie un `FormData` tel quel : le navigateur écrit lui-même l'en-tête `multipart` et sa frontière.
+
+
+## Fiches de révision (S8)
+
+### Back : application `revision`
+
+| Fichier | Rôle |
+| --- | --- |
+| `sanitizer.py` | `sanitize_sheet_html` : liste blanche `nh3` |
+| `models.py` | `RevisionSheet.save()` nettoie toujours le contenu |
+| `selectors.py` | `sheets_in(locker)`, `get_sheet(user, pk)` filtré sur `owner` et `subject__owner` |
+| `services.py` | `create_sheet` (propriétaire = celui du casier), `update_sheet` (`update_fields`), `delete_sheet` |
+| `serializers.py` | Résumé (liste), détail, écriture (`title`, `content` uniquement) |
+| `views.py` | `LockerSheetsView`, `SheetDetailView` |
+
+Routes : `lockers/<id>/sheets/` dans `apps/subjects/urls.py` (espace de noms `lockers`), et `sheets/` dans `config/api_urls.py` vers `apps/revision/urls.py` (espace de noms `sheets`).
+
+### Front : `features/sheets/`
+
+| Élément | Rôle |
+| --- | --- |
+| `api.ts`, `hooks.ts` | Schémas zod, requêtes et mutations ; clés de cache sous `["sheets"]` |
+| `paths.ts` | URL des pages de fiches, en un seul endroit |
+| `safe-html.ts` | Deuxième nettoyage (DOMPurify), même liste que le serveur |
+| `sheet-content.css` | Mise en forme du contenu, dans l'éditeur et à la lecture |
+| `components/` | `LockerSheets`, `EditorToolbar`, `SheetForm`, `SheetNotFound` |
+| `pages/` | `NewSheetPage`, `EditSheetPage`, `SheetPage` |
+
+| Route | Page |
+| --- | --- |
+| `/casiers/:lockerId/fiches/nouvelle` | Création |
+| `/fiches/:sheetId` | Lecture et suppression |
+| `/fiches/:sheetId/modifier` | Modification |
+
+Dans les tests, `src/test/setup.ts` remplace les mesures de mise en page dont ProseMirror a besoin et que jsdom ne calcule pas (`getClientRects`, `elementFromPoint`).

@@ -405,3 +405,32 @@ Si l'insertion en base échoue après l'écriture du fichier, le fichier est sup
 Calculé dans la même requête que la liste des casiers (pas de requête par casier) :
 
 `Count("documents", filter=Q(documents__kind="course"))`
+
+
+## Évolutions S8 — Fiches de révision
+
+### `revision_revisionsheet`
+
+| Colonne | Changement |
+| --- | --- |
+| `subject_id` | Devient **obligatoire** (`NOT NULL`). Suppression du casier → suppression de ses fiches (`CASCADE`) |
+| `title` | Contrainte `CHECK sheet_title_not_empty` : un titre vide est refusé par MySQL |
+| `content` | Contient du **HTML nettoyé** (liste blanche, voir ADR-026), et non plus du Markdown |
+
+Nouvel index `sheet_subject_updated_idx` sur `(subject_id, updated_at DESC)` : il sert la liste des fiches d'un casier, de la plus récente à la plus ancienne.
+
+`CASCADE` est appliqué par Django, pas par MySQL : une suppression faite directement en SQL, sans passer par Django, ne supprimerait pas les fiches.
+
+### Nettoyage systématique du contenu
+
+`RevisionSheet.save()` passe toujours `content` par `sanitize_sheet_html` avant l'écriture, quel que soit le chemin : API, administration Django, données de démo, futurs traitements IA.
+
+Seule exception : `RevisionSheet.objects.filter(...).update(content=...)` contourne `save()`. Cette méthode ne doit **jamais** être utilisée pour le contenu.
+
+### Cohérence du propriétaire
+
+`owner` et `subject.owner` désignent toujours le même élève. La base ne peut pas le garantir (contrainte entre deux tables). C'est le service `create_sheet` qui l'assure, en prenant le propriétaire du casier. Les lectures filtrent sur les deux champs, par sécurité.
+
+### Données de démo
+
+Quatre fiches : Inès (Mathématiques, Physique-Chimie), Lucas (Biologie), Emma (Économie). Le casier Histoire-géographie d'Emma reste vide pour tester l'état « aucune fiche ».
