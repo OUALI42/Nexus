@@ -1,4 +1,4 @@
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye } from "lucide-react";
 import { Link, useParams } from "react-router";
 
 import { isApiError } from "@/shared/api";
@@ -6,6 +6,8 @@ import { Button } from "@/shared/ui/Button";
 
 import { SheetForm } from "../components/SheetForm";
 import { useSheet, useUpdateSheet } from "../hooks";
+import { SheetNotFound } from "../components/SheetNotFound";
+import { sheetPaths } from "../paths";
 
 const BACK_LINK = "inline-flex min-h-tap items-center gap-2 self-start";
 
@@ -19,19 +21,6 @@ export function EditSheetPage() {
   return <EditSheetContent sheetId={id} />;
 }
 
-function SheetNotFound() {
-  return (
-    <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-bold">Fiche introuvable</h1>
-      <p>Cette fiche n'existe pas ou n'est plus disponible.</p>
-      <Link to="/casiers" className={BACK_LINK}>
-        <ArrowLeft aria-hidden="true" className="size-5" />
-        Retour à mes casiers
-      </Link>
-    </div>
-  );
-}
-
 function EditSheetContent({ sheetId }: { sheetId: number }) {
   const sheet = useSheet(sheetId);
   const updateSheet = useUpdateSheet(sheetId);
@@ -43,10 +32,16 @@ function EditSheetContent({ sheetId }: { sheetId: number }) {
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       {sheet.data && (
-        <Link to={`/casiers/${sheet.data.lockerId}`} className={BACK_LINK}>
-          <ArrowLeft aria-hidden="true" className="size-5" />
-          Retour au casier
-        </Link>
+        <div className="flex flex-wrap gap-4">
+          <Link to={`/casiers/${sheet.data.lockerId}`} className={BACK_LINK}>
+            <ArrowLeft aria-hidden="true" className="size-5" />
+            Retour au casier
+          </Link>
+          <Link to={sheetPaths.read(sheet.data.id)} className={BACK_LINK}>
+            <Eye aria-hidden="true" className="size-5" />
+            Voir la fiche
+          </Link>
+        </div>
       )}
       <h1 className="text-2xl font-bold">Modifier la fiche</h1>
 

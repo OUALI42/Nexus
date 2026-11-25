@@ -76,3 +76,7 @@ export function updateSheet(
 ): Promise<Sheet> {
   return api.patch(`/sheets/${sheetId}/`, payload, sheetSchema);
 }
+
+export function deleteSheet(sheetId: number): Promise<undefined> {
+  return api.delete(`/sheets/${sheetId}/`, z.undefined());
+}

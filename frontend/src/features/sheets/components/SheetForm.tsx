@@ -3,8 +3,10 @@ import "../sheet-content.css";
 import { EditorContent, useEditor, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useId, useState, type FormEvent } from "react";
+import { useBlocker } from "react-router";
 
 import { getFieldErrors, isApiError } from "@/shared/api";
+import { Modal } from "@/shared/ui/Modal";
 import { Button } from "@/shared/ui/Button";
 import { FieldError } from "@/shared/ui/FieldError";
 import { Input } from "@/shared/ui/Input";
@@ -110,6 +112,28 @@ export function SheetForm({
 
   const isDirty = title !== baseline.title || content !== baseline.content;
 
+  // In-app navigation (links, Back button): asks before losing changes.
+  // Never blocks the redirect to the login page (expired session).
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isDirty &&
+      !isSaving &&
+      nextLocation.pathname !== "/connexion" &&
+      nextLocation.pathname !== currentLocation.pathname,
+  );
+
+  // Closing the tab or reloading: the browser shows its own dialog.
+  useEffect(() => {
+    if (!isDirty) return;
+    function warn(event: BeforeUnloadEvent) {
+      event.preventDefault();
+    }
+    window.addEventListener("beforeunload", warn);
+    return () => {
+      window.removeEventListener("beforeunload", warn);
+    };
+  }, [isDirty]);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setFormError(null);
@@ -201,6 +225,23 @@ export function SheetForm({
         {/* Always rendered, so each change is announced. */}
         <p role="status">{status}</p>
       </div>
+
+      <Modal
+        open={blocker.state === "blocked"}
+        onClose={() => blocker.reset?.()}
+        title="Quitter sans enregistrer ?"
+        description="Tes dernières modifications seront perdues."
+        footer={
+          <>
+            <Button onClick={() => blocker.reset?.()}>
+              Rester sur la page
+            </Button>
+            <Button onClick={() => blocker.proceed?.()}>
+              Quitter sans enregistrer
+            </Button>
+          </>
+        }
+      />
     </form>
   );
 }

@@ -23,6 +23,7 @@ import { LockerPage } from "@/features/lockers/pages/LockerPage";
 import { NewLockerPage } from "@/features/lockers/pages/NewLockerPage";
 import { EditSheetPage } from "@/features/sheets/pages/EditSheetPage";
 import { NewSheetPage } from "@/features/sheets/pages/NewSheetPage";
+import { SheetPage } from "@/features/sheets/pages/SheetPage";
 
 // Every navigation entry except the dashboard gets a placeholder page for now.
 // Navigation entries that already have a real page.
@@ -87,6 +88,7 @@ export const routes: RouteObject[] = [
                 element: <NewSheetPage />,
               },
               { path: "/fiches/:sheetId/modifier", element: <EditSheetPage /> },
+              { path: "/fiches/:sheetId", element: <SheetPage /> },
               ...placeholderRoutes,
               ...(import.meta.env.DEV
                 ? [{ path: "design", Component: DesignSystemPage }]

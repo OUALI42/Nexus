@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createSheet,
+  deleteSheet,
   fetchLockerSheets,
   fetchSheet,
   updateSheet,
@@ -50,6 +51,19 @@ export function useUpdateSheet(sheetId: number) {
       queryClient.setQueryData(sheetKeys.detail(sheetId), sheet);
       void queryClient.invalidateQueries({
         queryKey: sheetKeys.list(sheet.lockerId),
+      });
+    },
+  });
+}
+
+export function useDeleteSheet(sheetId: number) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => deleteSheet(sheetId),
+    onSuccess: () => {
+      // Every locker's sheet list: the page then shows it without the deleted sheet.
+      void queryClient.invalidateQueries({
+        queryKey: [...sheetKeys.all, "list"],
       });
     },
   });
