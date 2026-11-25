@@ -90,3 +90,31 @@ sont exemptés par la WCAG (critère 2.5.5).
 - axe (WCAG A/AA) sur la liste des casiers, le formulaire avec une erreur affichée et la page d'un casier avec ses cours.
 - Navigation aux flèches dans les groupes de couleurs et d'icônes.
 - Description accessible du champ de dépôt (aide et erreur).
+
+
+## Fiches de révision (S8)
+
+### Éditeur
+
+- La zone d'écriture (`contenteditable`) a `role="textbox"`, `aria-multiline="true"` et `aria-labelledby` vers le libellé visible « Contenu de la fiche » (un `<label>` ne peut pas viser une zone `contenteditable`).
+- Un texte d'aide, relié par `aria-describedby`, donne les raccourcis : Ctrl+B, Ctrl+I, Ctrl+U, et Tab / Maj+Tab dans les listes. Une erreur de contenu y est ajoutée quand elle apparaît.
+- Le titre de la fiche est un champ classique avec libellé, validé avant l'envoi ; en cas d'erreur, le focus y revient.
+
+### Barre d'outils
+
+- `role="toolbar"`, nommée « Mise en forme », reliée à la zone d'écriture par `aria-controls`.
+- **Un seul arrêt de tabulation** (tabindex itinérant) : les flèches, Début et Fin naviguent entre les boutons.
+- Chaque bouton a un nom (« Gras », « Titre », « Liste à puces »…). Les boutons à bascule exposent leur état par `aria-pressed`, et à l'écran par un fond plein, pas seulement par une teinte.
+- Annuler et Rétablir utilisent `aria-disabled` plutôt que `disabled`, pour rester atteignables au clavier.
+- Toutes les cibles font 44 × 44 px.
+
+### Confirmations
+
+- La ligne d'état d'enregistrement est en `role="status"`, présente en permanence : chaque changement est annoncé.
+- Les fenêtres « Supprimer cette fiche ? » et « Quitter sans enregistrer ? » utilisent la `Modal` de la S3 : `<dialog>` natif, titre et description reliés, piège du focus, Échap pour fermer, retour du focus au bouton d'origine.
+
+### Lecture d'une fiche
+
+- La fiche est un `<article>`. Son titre est le `h1`, et les `h2` et `h3` du contenu se placent dessous : la hiérarchie reste correcte.
+- Les liens d'une fiche dans la page du casier portent le titre et la date de modification : « Suites numériques : l'essentiel Modifiée le 20 novembre 2026 ».
+- Les fiches et les cours ont des icônes différentes (carnet et document), en plus de leurs titres de section.

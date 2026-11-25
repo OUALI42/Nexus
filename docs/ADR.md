@@ -571,3 +571,110 @@ La création d'un casier (nom, couleur, icône) et le dépôt d'un cours doivent
 
 - **Boutons personnalisés avec `role="radio"`** : il faudrait recoder la navigation aux flèches et la gestion du focus.
 - **Bibliothèque de composants** : une dépendance de plus pour deux groupes de boutons radio.
+
+
+## ADR-025 — Contenu des fiches en HTML riche, édité avec TipTap
+
+- **Date** : 25/11/2026
+- **Statut** : Acceptée
+- **Story** : S8
+
+### Contexte
+
+Une fiche de révision a besoin de mise en forme : titres, listes, gras, citations. Les élèves de prépa ne connaissent pas forcément une syntaxe comme Markdown. Le contenu servira plus tard à l'export PDF et à la génération par l'IA.
+
+### Décision
+
+- Le contenu est stocké en **HTML**, limité aux balises de la liste blanche (ADR-026).
+- L'édition se fait avec **TipTap v3** (sur ProseMirror) : `StarterKit` configuré avec des titres `h2` et `h3` seulement (la page a déjà son `h1`), et des liens reconnus automatiquement mais non cliquables pendant l'édition.
+- La barre d'outils est rendue accessible à la main : modèle ARIA `toolbar` (un seul arrêt de tabulation, flèches pour naviguer), `aria-pressed` pour les boutons à bascule, `aria-disabled` pour Annuler et Rétablir.
+
+### Conséquences
+
+- Environ 100 Ko (compressés) ajoutés au bundle. Un chargement à la demande (`React.lazy`) est possible plus tard.
+- Pas de bouton d'insertion de lien en v1 : un lien collé est reconnu automatiquement.
+- La saisie dans l'éditeur ne peut pas être testée de façon fiable dans jsdom : elle est vérifiée manuellement.
+
+### Alternatives écartées
+
+- **Markdown dans une zone de texte** : syntaxe à apprendre, et il faudrait quand même convertir puis nettoyer du HTML pour l'afficher.
+- **Texte brut** : trop pauvre pour une fiche.
+
+---
+
+## ADR-026 — Nettoyage du HTML en deux couches
+
+- **Date** : 25/11/2026
+- **Statut** : Acceptée
+- **Story** : S8
+
+### Contexte
+
+N'importe quel client peut appeler l'API directement, sans passer par l'éditeur. Un HTML enregistré puis affiché tel quel permettrait une **XSS stockée** : un script exécuté dans le navigateur de l'élève, sur le domaine de Nexus.
+
+### Décision
+
+1. **À l'écriture, côté serveur** : `nh3` (bibliothèque Rust `ammonia`) avec une **liste blanche** (`p`, `br`, `h2`, `h3`, `strong`, `em`, `u`, `s`, `ul`, `ol`, `li`, `blockquote`, `code`, `pre`, `hr`, `a` avec `href`). Liens limités à `http`, `https` et `mailto`, avec `rel="noopener noreferrer nofollow"` ajouté automatiquement. Le nettoyage est appelé dans `RevisionSheet.save()` : aucun chemin d'écriture n'y échappe.
+2. **À l'affichage, côté navigateur** : DOMPurify, avec la même liste, juste avant `dangerouslySetInnerHTML`.
+
+Une liste blanche, jamais une liste noire : il existe des centaines de façons d'exécuter du JavaScript dans du HTML.
+
+### Conséquences
+
+- La base ne contient jamais de HTML dangereux : l'export PDF et l'IA peuvent réutiliser le contenu sans risque.
+- Les deux listes doivent rester identiques : `apps/revision/sanitizer.py` et `frontend/src/features/sheets/safe-html.ts`. Ajouter une balise à l'éditeur impose de l'ajouter aux deux.
+- 16 tests couvrent le nettoyage serveur (11 attaques, dont `javascript:` encodé et liens `data:`), et un test vérifie le nettoyage navigateur.
+
+### Alternatives écartées
+
+- **`bleach`** : abandonnée par ses mainteneurs depuis 2023, qui recommandent `nh3`.
+- **Nettoyer seulement à l'affichage** : la base contiendrait du HTML dangereux, que l'export ou l'IA réutiliseraient.
+- **Une seule couche** : un bug ou une ancienne donnée suffirait à exposer les élèves.
+
+---
+
+## ADR-027 — Une fiche appartient toujours à un casier
+
+- **Date** : 25/11/2026
+- **Statut** : Acceptée
+- **Story** : S8
+
+### Contexte
+
+Le modèle de la S1 permettait une fiche sans casier (`subject` facultatif, `SET_NULL`). Le critère de la S8 dit qu'une fiche est rangée dans un casier.
+
+### Décision
+
+`subject` devient obligatoire, avec `on_delete=CASCADE` : supprimer un casier supprime ses fiches.
+
+### Conséquences
+
+- La future story de suppression des casiers devra l'annoncer dans sa confirmation : « Ce casier contient 3 cours et 2 fiches, qui seront supprimés ».
+- Un test fixe ce comportement (`test_deleting_a_locker_deletes_its_sheets`).
+
+### Alternatives écartées
+
+- **`PROTECT`** : il faudrait vider un casier fiche par fiche avant de pouvoir le supprimer.
+- **`SET_NULL`** : des fiches orphelines, invisibles dans l'interface mais toujours en base.
+
+---
+
+## ADR-028 — Ne jamais perdre ni supprimer une fiche par erreur
+
+- **Date** : 25/11/2026
+- **Statut** : Acceptée
+- **Story** : S8
+
+### Décision
+
+- **Sauvegarde explicite**, avec confirmation visible : un toast « Fiche enregistrée. » et une ligne d'état permanente (`role="status"`) qui affiche « Modifications non enregistrées » puis « Enregistrée à 17:42 ».
+- **Alerte de sortie** :
+  - navigation dans l'application : `useBlocker` de React Router et la `Modal` (« Rester sur la page » / « Quitter sans enregistrer ») ;
+  - fermeture de l'onglet ou rechargement : `beforeunload`, avec la boîte de dialogue du navigateur.
+  - Jamais pendant un enregistrement, ni vers `/connexion` (session expirée).
+- **Suppression après confirmation** : la `Modal` nomme la fiche et dit que c'est définitif ; le bouton dit ce qu'il fait (« Supprimer définitivement »). Une erreur s'affiche dans la fenêtre, qui reste ouverte.
+- Après création ou suppression, la navigation remplace l'entrée de l'historique (`replace`) : le bouton Retour ne ramène ni vers un formulaire vide, ni vers une fiche supprimée.
+
+### Alternative écartée
+
+- **Sauvegarde automatique** : confortable, mais elle demande de gérer les conflits, les requêtes en série et l'état « en cours d'enregistrement ». À envisager dans une version suivante.
